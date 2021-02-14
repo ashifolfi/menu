@@ -27,150 +27,169 @@ end
 function gmcallbacks.menuInit(player)
 	player.goldmenu = {}
 
-	player.goldmenu.open = false -- are we open?????????
+	local goldmenu = player.goldmenu
 
-	player.goldmenu.pressed = {} -- pressed buttons.
+	goldmenu.open = false -- are we open?????????
 
-	-- previous button actions. maybe should go into player.goldmenu.pressed.prev.*?
-	player.goldmenu.prevangleturn = player.cmd.angleturn
-	player.goldmenu.prevaiming = player.cmd.aiming
+	goldmenu.pressed = {} -- pressed buttons.
 
-	player.goldmenu.binds = {} -- binds buttons to menu actions.
+	-- previous button actions. maybe should go into goldmenu.pressed.prev.*?
+	goldmenu.prevangleturn = player.cmd.angleturn
+	goldmenu.prevaiming = player.cmd.aiming
+
+	goldmenu.binds = {} -- binds buttons to menu actions.
 
 	-- register keybinds.
 	for menuBind, control in pairs(gmconf.defaultBinds) do
-		player.goldmenu.binds[menuBind] = control
+		goldmenu.binds[menuBind] = control
 	end
 
 	-- menus; the last item is the current menu.
 	-- array'd because we might want to draw over another menu!
-	player.goldmenu.menus = {gmdata.menu} -- automatically load the main menu
-	player.goldmenu.menudata = {}
-	table.insert(player.goldmenu.menudata, initMenuData())
+	goldmenu.menus = {gmdata.menu} -- automatically load the main menu
+	goldmenu.menudata = {}
+	table.insert(goldmenu.menudata, initMenuData())
 
-	local menu = table.last(player.goldmenu.menus)
-	local menudata = table.last(player.goldmenu.menudata)
+	goldmenu.curMenu = #goldmenu.menus
+
+	local menu = goldmenu.menus[goldmenu.curMenu]
+	local menudata = goldmenu.menudata[goldmenu.curMenu]
 
 	menu.style.init(menudata, menu)
 end
 
 function gmcallbacks.doMenu(player)
+	local goldmenu = player.goldmenu
+
 	-- determine if the open bind has been pressed.
-	local openPressed = gmcontrols.menuBindPressed(player.goldmenu, gmconst.menuBind.open)
+	local openPressed = gmcontrols.menuBindPressed(goldmenu, gmconst.menuBind.open)
 
 	-- has it been pressed for < 1 tic?
 	if openPressed == 1 then
-		player.goldmenu.open = not $ -- toggle menu
+		goldmenu.open = not $ -- toggle menu
 	end
 
-	local menu = table.last(player.goldmenu.menus)
-	local menudata = table.last(player.goldmenu.menudata)
-	local curItem = menu.items[menudata.cursorPos]
+	for i, menu in ipairs(goldmenu.menus) do
+		local activeMenu = i == goldmenu.curMenu
 
-	-- start (or continue) fading in if open; start (or continue) fading out if closed.
-	-- this makes it so spamming open will not do funky fade snapping.
-	if player.goldmenu.open then
-		menudata.fadeProgress = ($ < FRACUNIT) and $ + gmconf.fadeSpeed or $
-		menudata.fadeProgress = ($ > FRACUNIT) and FRACUNIT or $
-	else
-		menudata.fadeProgress = ($ < 0) and $ or $ - gmconf.fadeSpeed
-		menudata.fadeProgress = ($ > 0) and $ or 0
-	end
+		local menudata = goldmenu.menudata[i]
+		local curItem = menu.items[menudata.cursorPos]
 
-	if player.goldmenu.open then
-		local upTics = gmcontrols.menuBindPressed(player.goldmenu, gmconst.menuBind.up)
-		local downTics = gmcontrols.menuBindPressed(player.goldmenu, gmconst.menuBind.down)
+		-- start (or continue) fading in if open; start (or continue) fading out if closed.
+		-- this makes it so spamming open will not do funky fade snapping.
+		if goldmenu.open then
+			menudata.fadeProgress = ($ < FRACUNIT) and $ + gmconf.fadeSpeed or $
+			menudata.fadeProgress = ($ > FRACUNIT) and FRACUNIT or $
+		else
+			menudata.fadeProgress = ($ < 0) and $ or $ - gmconf.fadeSpeed
+			menudata.fadeProgress = ($ > 0) and $ or 0
+		end
 
-		local selectTics = gmcontrols.menuBindPressed(player.goldmenu, gmconst.menuBind.select)
-		local backTics = gmcontrols.menuBindPressed(player.goldmenu, gmconst.menuBind.back)
+		if goldmenu.open and activeMenu then
+			local upTics = gmcontrols.menuBindPressed(goldmenu, gmconst.menuBind.up)
+			local downTics = gmcontrols.menuBindPressed(goldmenu, gmconst.menuBind.down)
 
-		if upTics == 1 or (upTics > gmconf.holdWait and (leveltime % gmconf.ticsBetweenHoldAdvance) == 0) then
-			menudata.prevCursorPos = menudata.cursorPos
+			local selectTics = gmcontrols.menuBindPressed(goldmenu, gmconst.menuBind.select)
+			local backTics = gmcontrols.menuBindPressed(goldmenu, gmconst.menuBind.back)
 
-			if menudata.cursorPos <= 1 then
-				menu.style.moveCursorFailed(menudata, menudata.cursorPos - 1)
-			else
-				menudata.cursorPos = $ - 1
-				menu.style.moveCursor(menudata, menudata.cursorPos)
+			if upTics == 1 or (upTics > gmconf.holdWait and (leveltime % gmconf.ticsBetweenHoldAdvance) == 0) then
+				menudata.prevCursorPos = menudata.cursorPos
+
+				if menudata.cursorPos <= 1 then
+					menu.style.moveCursorFailed(menudata, menudata.cursorPos - 1)
+				else
+					menudata.cursorPos = $ - 1
+					menu.style.moveCursor(menudata, menudata.cursorPos)
+				end
+			end
+
+			if downTics == 1 or (downTics > gmconf.holdWait and (leveltime % gmconf.ticsBetweenHoldAdvance) == 0) then
+				menudata.prevCursorPos = menudata.cursorPos
+
+				if menudata.cursorPos >= #menu.items then
+					menu.style.moveCursorFailed(menudata, menudata.cursorPos + 1)
+				else
+					menudata.cursorPos = $ + 1
+					menu.style.moveCursor(menudata, menudata.cursorPos)
+				end
+			end
+
+			if selectTics == 1 and curItem.flags == gmconst.itemFlag.subMenu and type(curItem.data) == "table" then
+				local curMenu = goldmenu.curMenu
+				local newCurMenu = curMenu + 1
+
+				local alreadyInited = goldmenu.menus[newCurMenu] == curItem.data
+
+				goldmenu.curMenu = newCurMenu
+
+				if not alreadyInited then
+					goldmenu.menus[newCurMenu] = curItem.data
+					goldmenu.menudata[newCurMenu] = initMenuData()
+
+					menu = goldmenu.menus[newCurMenu]
+					menudata = goldmenu.menudata[newCurMenu]
+
+					menudata.fadeStrength = goldmenu.menudata[curMenu].fadeStrength
+					menudata.fadeProgress = goldmenu.menudata[curMenu].fadeProgress
+					menudata.transparency = goldmenu.menudata[curMenu].transparency
+
+					menu.style.init(menudata, menu)
+				end
+			end
+
+			if backTics == 1 and goldmenu.curMenu > 1 then
+				local curMenu = goldmenu.curMenu
+				local newCurMenu = curMenu - 1
+
+				goldmenu.curMenu = newCurMenu
+
+				menu = goldmenu.menus[newCurMenu]
+				menudata = goldmenu.menudata[newCurMenu]
+
+				menudata.fadeStrength = goldmenu.menudata[curMenu].fadeStrength
+				menudata.fadeProgress = goldmenu.menudata[curMenu].fadeProgress
+				menudata.transparency = goldmenu.menudata[curMenu].transparency
 			end
 		end
 
-		if downTics == 1 or (downTics > gmconf.holdWait and (leveltime % gmconf.ticsBetweenHoldAdvance) == 0) then
-			menudata.prevCursorPos = menudata.cursorPos
+		-- fade strength used by menu drawers.
+		menudata.fadeStrength = gmutil.fixedLerp(0, gmconf.maxFadeStrength, menudata.fadeProgress)
+		menudata.transparency = gmutil.fixedLerp(0, 10, FRACUNIT - menudata.fadeProgress) << FF_TRANSSHIFT
 
-			if menudata.cursorPos >= #menu.items then
-				menu.style.moveCursorFailed(menudata, menudata.cursorPos + 1)
-			else
-				menudata.cursorPos = $ + 1
-				menu.style.moveCursor(menudata, menudata.cursorPos)
-			end
-		end
-
-		if selectTics == 1 and curItem.flags == gmconst.itemFlag.subMenu and type(curItem.data) == "table" then
-			local fadeStrength = menudata.fadeStrength
-			local fadeProgress = menudata.fadeProgress
-			local transparency = menudata.transparency
-
-			table.insert(player.goldmenu.menus, curItem.data)
-			table.insert(player.goldmenu.menudata, initMenuData())
-
-			menu = table.last(player.goldmenu.menus)
-			menudata = table.last(player.goldmenu.menudata)
-
-			menudata.fadeStrength = fadeStrength
-			menudata.fadeProgress = fadeProgress
-			menudata.transparency = transparency
-
-			menu.style.init(menudata, menu)
-		end
-
-		if backTics == 1 and #player.goldmenu.menus > 1 then
-			local fadeStrength = menudata.fadeStrength
-			local fadeProgress = menudata.fadeProgress
-			local transparency = menudata.transparency
-
-			table.remove(player.goldmenu.menus)
-			table.remove(player.goldmenu.menudata)
-
-			menudata.fadeStrength = fadeStrength
-			menudata.fadeProgress = fadeProgress
-			menudata.transparency = transparency
-		end
+		menu.style.update(menudata, menu, player)
 	end
-
-	-- fade strength used by menu drawers.
-	menudata.fadeStrength = gmutil.fixedLerp(0, gmconf.maxFadeStrength, menudata.fadeProgress)
-	menudata.transparency = gmutil.fixedLerp(0, 10, FRACUNIT - menudata.fadeProgress) << FF_TRANSSHIFT
-
-	menu.style.update(menudata, menu, player)
 end
 
 function gmcallbacks.onControlsGet(player)
+	local goldmenu = player.goldmenu
+
 	gmcontrols.getMenuControls(player)
 
 	local cmd = player.cmd
 
-	if player.goldmenu.open then
+	if goldmenu.open then
 		cmd.buttons = 0
 		cmd.forwardmove = 0
 		cmd.sidemove = 0
 
-		cmd.angleturn = player.goldmenu.prevangleturn
-		cmd.aiming = player.goldmenu.prevaiming
+		cmd.angleturn = goldmenu.prevangleturn
+		cmd.aiming = goldmenu.prevaiming
 
-		player.mo.angle = player.goldmenu.prevangleturn << 16
-		player.aiming = player.goldmenu.prevaiming << 16
+		player.mo.angle = goldmenu.prevangleturn << 16
+		player.aiming = goldmenu.prevaiming << 16
 	end
 
-	player.goldmenu.prevangleturn = cmd.angleturn
-	player.goldmenu.prevaiming = cmd.aiming
+	goldmenu.prevangleturn = cmd.angleturn
+	goldmenu.prevaiming = cmd.aiming
 end
 
 -- draw stuff
 
 function gmcallbacks.drawMenu(v, player)
-	local menudata = table.last(player.goldmenu.menudata)
-	local menu = table.last(player.goldmenu.menus)
+	local goldmenu = player.goldmenu
+
+	local menudata = goldmenu.menudata[goldmenu.curMenu]
+	local menu = goldmenu.menus[goldmenu.curMenu]
 
 	v.fadeScreen(0xFA00, menudata.fadeStrength)
 
@@ -181,7 +200,7 @@ function gmcallbacks.drawMenu(v, player)
 		v.drawString(0, 200 - 8, menudata.fadeStrength, strFlags)
 
 		for i = 1, gmconst.control.maxAttainable do
-			local iv = player.goldmenu.pressed[i]
+			local iv = goldmenu.pressed[i]
 
 			if iv == nil then
 				continue
