@@ -30,6 +30,7 @@ function gmcallbacks.menuInit(player)
 	local goldmenu = player.goldmenu
 
 	goldmenu.open = false -- are we open?????????
+	goldmenu.heldControlLock = 0 -- Locks the controls while one is held.
 
 	goldmenu.pressed = {} -- pressed buttons.
 
@@ -125,6 +126,32 @@ function gmcallbacks.doMenu(player)
 				if not alreadyInited then
 					goldmenu.menus[newCurMenu] = curItem.data
 					goldmenu.menudata[newCurMenu] = initMenuData()
+				end
+
+				menu = goldmenu.menus[newCurMenu]
+				menudata = goldmenu.menudata[newCurMenu]
+
+				if not alreadyInited then
+					menudata.fadeStrength = goldmenu.menudata[curMenu].fadeStrength
+					menudata.fadeProgress = goldmenu.menudata[curMenu].fadeProgress
+					menudata.transparency = goldmenu.menudata[curMenu].transparency
+
+					menu.style.init(menudata, menu)
+				end
+
+				if menu.style.drawMenusBelow then
+					menudata.fadeStrength = 0
+					menudata.fadeProgress = 0
+					menudata.transparency = 0
+				end
+			end
+
+			if backTics == 1 then
+				if goldmenu.curMenu > 1
+					local curMenu = goldmenu.curMenu
+					local newCurMenu = curMenu - 1
+
+					goldmenu.curMenu = newCurMenu
 
 					menu = goldmenu.menus[newCurMenu]
 					menudata = goldmenu.menudata[newCurMenu]
@@ -132,23 +159,10 @@ function gmcallbacks.doMenu(player)
 					menudata.fadeStrength = goldmenu.menudata[curMenu].fadeStrength
 					menudata.fadeProgress = goldmenu.menudata[curMenu].fadeProgress
 					menudata.transparency = goldmenu.menudata[curMenu].transparency
-
-					menu.style.init(menudata, menu)
+				else
+					goldmenu.open = not $
+					goldmenu.heldControlLock = goldmenu.binds[gmconst.menuBind.back]
 				end
-			end
-
-			if backTics == 1 and goldmenu.curMenu > 1 then
-				local curMenu = goldmenu.curMenu
-				local newCurMenu = curMenu - 1
-
-				goldmenu.curMenu = newCurMenu
-
-				menu = goldmenu.menus[newCurMenu]
-				menudata = goldmenu.menudata[newCurMenu]
-
-				menudata.fadeStrength = goldmenu.menudata[curMenu].fadeStrength
-				menudata.fadeProgress = goldmenu.menudata[curMenu].fadeProgress
-				menudata.transparency = goldmenu.menudata[curMenu].transparency
 			end
 		end
 
@@ -167,7 +181,13 @@ function gmcallbacks.onControlsGet(player)
 
 	local cmd = player.cmd
 
-	if goldmenu.open then
+	if goldmenu.heldControlLock then
+		if not goldmenu.pressed[goldmenu.heldControlLock] then
+			goldmenu.heldControlLock = 0
+		end
+	end
+
+	if goldmenu.open or goldmenu.heldControlLock then
 		cmd.buttons = 0
 		cmd.forwardmove = 0
 		cmd.sidemove = 0
@@ -188,30 +208,44 @@ end
 function gmcallbacks.drawMenu(v, player)
 	local goldmenu = player.goldmenu
 
-	local menudata = goldmenu.menudata[goldmenu.curMenu]
-	local menu = goldmenu.menus[goldmenu.curMenu]
+	local lowestMenuToDraw = goldmenu.curMenu
 
-	v.fadeScreen(0xFA00, menudata.fadeStrength)
+	for i = goldmenu.curMenu, 1, -1 do
+		local menu = goldmenu.menus[i]
 
-	local strFlags = V_ALLOWLOWERCASE|menudata.transparency
-	local patchFlags = menudata.transparency
-
-	if gmdebug then
-		v.drawString(0, 200 - 8, menudata.fadeStrength, strFlags)
-
-		for i = 1, gmconst.control.maxAttainable do
-			local iv = goldmenu.pressed[i]
-
-			if iv == nil then
-				continue
-			end
-
-			v.drawString(0, (i - 1) * 4, gmconst.controlToString[i] or "???", strFlags, "small")
-			v.drawString(80, (i - 1) * 4, iv, strFlags, "small-right")
+		if not menu.style.drawMenusBelow then
+			break
 		end
+
+		lowestMenuToDraw = $ - 1
 	end
 
-	menu.style.drawer(v, menudata, menu, gmconf)
+	v.fadeScreen(0xFA00, goldmenu.menudata[1].fadeStrength)
+
+	for i = lowestMenuToDraw, goldmenu.curMenu do			
+		local menudata = goldmenu.menudata[i]
+		local menu = goldmenu.menus[i]
+
+		local strFlags = V_ALLOWLOWERCASE|menudata.transparency
+		local patchFlags = menudata.transparency
+
+		if gmdebug then
+			v.drawString(0, 200 - 8, menudata.fadeStrength, strFlags)
+
+			for i = 1, gmconst.control.maxAttainable do
+				local iv = goldmenu.pressed[i]
+
+				if iv == nil then
+					continue
+				end
+
+				v.drawString(0, (i - 1) * 4, gmconst.controlToString[i] or "???", strFlags, "small")
+				v.drawString(80, (i - 1) * 4, iv, strFlags, "small-right")
+			end
+		end
+
+		menu.style.drawer(v, menudata, menu, gmconf)
+	end
 end
 
 return gmcallbacks

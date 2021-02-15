@@ -19,13 +19,22 @@ local secondMenu = {
 	}
 }
 
+local thirdMenu = {
+	name = "Another Submenu!",
+	style = gmstyles.scroll,
+	items = {
+		"This one scrolls!",
+		"Isn't that neat?",
+	}
+}
+
 -- Note: should be parsable by gmdata.parseMenuInitialisation.
 gmdata.menu = {
 	name = "Main Menu",
 	style = gmstyles.scroll,
 	items = {
-		{gmconst.itemFlag.subMenu, "line 1", secondMenu},
-		"VERY LONG LINE !!!!!!",
+		{gmconst.itemFlag.subMenu, "A submenu...", secondMenu},
+		{gmconst.itemFlag.subMenu, "Another submenu...", thirdMenu},
 		"line 2",
 		"short",
 		"line 3",
@@ -223,7 +232,9 @@ function gmdata.parseMenuInitialisation(menuInit)
 	if #menuInit then
 		name, style, itemTable = unpack(menuInit)
 	else
-		name, style, itemTable = menuInit.name, menuInit.style, menuInit.items
+		name = menuInit.name
+		style = menuInit.style
+		itemTable = menuInit.items
 	end
 
 	itemTable = gmdata.parseItemTableInitialisation($)

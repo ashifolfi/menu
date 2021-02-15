@@ -1,5 +1,8 @@
 local scroll = {}
 
+-- Config for use by menu.lua
+scroll.drawMenusBelow = false
+
 local gmutil = lua_require("util")
 
 local config = {

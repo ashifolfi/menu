@@ -1,5 +1,8 @@
 local static = {}
 
+-- Config for use by menu.lua
+static.drawMenusBelow = true
+
 local config = {
 	x = 32,
 	y = 48,

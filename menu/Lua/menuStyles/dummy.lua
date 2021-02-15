@@ -1,5 +1,8 @@
 local dummy = {}
 
+-- Config for use by menu.lua
+dummy.drawMenusBelow = false
+
 local config = {}
 
 function dummy.init(menudata, menu)
