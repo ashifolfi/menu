@@ -111,6 +111,9 @@ function gmdata.newMenu(menuname, style, itemTable, parent)
 	newMenu.items = itemTable or {}
 	newMenu.style = style or gmstyles.scroll
 
+	newMenu.prevCursorPos = 1
+	newMenu.cursorPos = 1
+
 	newMenu.parent = parent -- parent menu
 
 	newMenu.open = false

@@ -111,3 +111,5 @@ debugmode = lua_require("debug")
 lua_notice("Debug mode is ON") -- only prints when debug mode is on LOL
 
 local main = lua_require("main")
+
+_G.lua_require = nil

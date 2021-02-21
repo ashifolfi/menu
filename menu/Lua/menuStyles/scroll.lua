@@ -22,27 +22,67 @@ local config = {
 config.fontAligned = (#config.font and config.font ~= "normal") and (config.font .. "-center") or "center"
 config.font = #$ and $ or "normal"
 
-function scroll.init(menudata)
-	menudata.scrollFrac = FRACUNIT
+function scroll.init(menudata, menu)
+	menudata.scrollFrac = menu.cursorPos * FRACUNIT
 	menudata.transitionFrac = FRACUNIT
+
+	-- fading vars.
+	menudata.fadeStrength = 0
+	menudata.fadeProgress = 0
+	menudata.transparency = 0
+	menudata.transHalf = 0
 end
 
-function scroll.moveCursor(menudata, newItem)
+function scroll.menuToggle(toggleState, menudata, menu)
+	menudata.open = toggleState
+
+	print(
+		string.format(
+			"Goldmenu: %s, Actual menu: %s",
+			toggleState and "true" or "false",
+			menu.open and "true" or "false"
+		)
+	)
+end
+
+function scroll.moveCursor(success, newItem, menudata, menu)
 	menudata.transitionFrac = 0
+
+	if not success then
+		local sign = menu.cursorPos - newItem
+		local offsetAmount = FRACUNIT/2
+
+		menudata.scrollFrac = newItem * FRACUNIT + (offsetAmount * sign)
+	end
 end
 
-function scroll.moveCursorFailed(menudata, itemTried)
-	local sign = menudata.cursorPos - itemTried
-	local offsetAmount = FRACUNIT/2
-
-	menudata.transitionFrac = 0
-	menudata.scrollFrac = itemTried * FRACUNIT + (offsetAmount * sign)
-end
-
-function scroll.update(menudata)
+function scroll.update(menudata, menu, gmconf)
 	-- scroll and transition amount
-	menudata.scrollFrac = $ + FixedMul((menudata.cursorPos * FRACUNIT) - $, config.scrollSpeed)
+	menudata.scrollFrac = $ + FixedMul((menu.cursorPos * FRACUNIT) - $, config.scrollSpeed)
 	menudata.transitionFrac = $ + FixedMul(FRACUNIT - $, config.scrollSpeed)
+
+	-- start (or continue) fading in if open; start (or continue) fading out if closed.
+	-- this makes it so spamming open will not do funky fade snapping.
+	if menudata.open then
+		menudata.fadeProgress = ($ < FRACUNIT) and $ + gmconf.fadeSpeed or $
+		menudata.fadeProgress = ($ > FRACUNIT) and FRACUNIT or $
+	else
+		if not menu.open then -- in submenu and not exiting full menu? set to 0
+			menudata.fadeProgress = 0
+		else -- otherwise fade!
+			menudata.fadeProgress = ($ < 0) and $ or $ - gmconf.fadeSpeed
+			menudata.fadeProgress = ($ > 0) and $ or 0
+		end
+	end
+
+	-- fade strength used by menu drawers.
+	menudata.fadeStrength = gmutil.fixedLerp(0, gmconf.maxFadeStrength, menudata.fadeProgress)
+	menudata.transparency = gmutil.fixedLerp(0, 10, FRACUNIT - menudata.fadeProgress) << FF_TRANSSHIFT
+	menudata.transHalf = gmutil.fixedLerp(5, 10, FRACUNIT - menudata.fadeProgress) << FF_TRANSSHIFT
+
+	if not menudata.fadeProgress then
+		return false -- pop menu!
+	end
 end
 
 local function drawMenuTitle(v, config, menu, gmconf, strFlags)
@@ -51,6 +91,7 @@ end
 
 function scroll.drawer(v, menudata, menu, gmconf)
 	local strFlags = V_ALLOWLOWERCASE|menudata.transparency
+	local strFlagsTrans = V_ALLOWLOWERCASE|menudata.transHalf
 	local patchFlags = menudata.transparency
 
 	local cursor = v.cachePatch(config.cursor)
@@ -59,19 +100,19 @@ function scroll.drawer(v, menudata, menu, gmconf)
 	local cursorPercentage = menudata.transitionFrac
 
 	if not #menu.items then
-		v.drawString(160, 100 - 4, "Menu is empty.", strFlags, config.fontAligned)
+		v.drawString(160, 100 - 4, "Menu is empty.", strFlagsTrans, config.fontAligned)
 		drawMenuTitle(v, config, menu, gmconf, strFlags)
 		return
 	end
 
-	if not menu.items[menudata.cursorPos] then
-		v.drawString(160, 100 - 4, string.format("ERROR: Cannot access menu, item %d", menudata.cursorPos), strFlags, config.fontAligned)
+	if not menu.items[menu.cursorPos] then
+		v.drawString(160, 100 - 4, string.format("ERROR: Cannot access menu, item %d", menu.cursorPos), strFlags, config.fontAligned)
 		drawMenuTitle(v, config, menu, gmconf, strFlags)
 		return
 	end
 
-	local width1 = v.stringWidth(menu.items[menudata.prevCursorPos].text or "", strFlags, config.font)
-	local width2 = v.stringWidth(menu.items[menudata.cursorPos].text or "", strFlags, config.font)
+	local width1 = v.stringWidth(menu.items[menu.prevCursorPos].text or "", strFlags, config.font)
+	local width2 = v.stringWidth(menu.items[menu.cursorPos].text or "", strFlags, config.font)
 
 	local lerpwidth = gmutil.fixedLerp(width1*FRACUNIT, width2*FRACUNIT, menudata.transitionFrac)
 	lerpwidth = ($ + FRACUNIT/2) / FRACUNIT -- round nicely
@@ -113,7 +154,7 @@ function scroll.drawer(v, menudata, menu, gmconf)
 
 		local localStrFlags = (strFlags & ~V_ALPHAMASK) | transparency
 
-		if i == menudata.cursorPos then
+		if i == menu.cursorPos then
 			localStrFlags = ($ & ~V_CHARCOLORMASK) | gmconf.selectionColor
 		end
 

@@ -3,6 +3,8 @@ local static = {}
 -- Config for use by menu.lua
 static.drawMenusBelow = true
 
+local gmutil = lua_require("util")
+
 local config = {
 	x = 32,
 	y = 48,
@@ -20,16 +22,31 @@ local config = {
 config.fontAligned = (#config.font and config.font ~= "normal") and (config.font .. "-center") or "center"
 config.font = #$ and $ or "normal"
 
-function static.init(menudata, menu)
+function static.init(menudata)
+	-- fading vars.
+	menudata.fadeStrength = 0
+	menudata.fadeProgress = 0
+	menudata.transparency = 0
 end
 
-function static.moveCursor(menudata, newItem)
+function static.menuToggle(toggleState, menudata, menu)
+	menudata.open = toggleState
 end
 
-function static.moveCursorFailed(menudata, itemTried)
-end
+function static.update(menudata, menu, gmconf)
+	-- start (or continue) fading in if open; start (or continue) fading out if closed.
+	-- this makes it so spamming open will not do funky fade snapping.
+	if menudata.open then
+		menudata.fadeProgress = ($ < FRACUNIT) and $ + gmconf.fadeSpeed or $
+		menudata.fadeProgress = ($ > FRACUNIT) and FRACUNIT or $
+	else
+		menudata.fadeProgress = ($ < 0) and $ or $ - gmconf.fadeSpeed
+		menudata.fadeProgress = ($ > 0) and $ or 0
+	end
 
-function static.update(menudata)
+	-- fade strength used by menu drawers.
+	menudata.fadeStrength = gmutil.fixedLerp(0, gmconf.maxFadeStrength, menudata.fadeProgress)
+	menudata.transparency = gmutil.fixedLerp(0, 10, FRACUNIT - menudata.fadeProgress) << FF_TRANSSHIFT
 end
 
 function static.drawer(v, menudata, menu, gmconf)
@@ -39,7 +56,7 @@ function static.drawer(v, menudata, menu, gmconf)
 	local cursor = v.cachePatch(config.cursor)
 	local cursorWidth = cursor.width
 
-	local cursorY = config.y + menudata.cursorPos * config.lineSpacing
+	local cursorY = config.y + menu.cursorPos * config.lineSpacing
 
 	v.draw(config.x - cursorWidth - config.cursorSpacing, cursorY, cursor, patchFlags)
 
@@ -48,7 +65,7 @@ function static.drawer(v, menudata, menu, gmconf)
 
 		local localStrFlags = (strFlags & ~V_ALPHAMASK) | menudata.transparency
 
-		if i == menudata.cursorPos then
+		if i == menu.cursorPos then
 			localStrFlags = ($ & ~V_CHARCOLORMASK) | gmconf.selectionColor
 		end
 

@@ -30,7 +30,10 @@ local thirdMenu = {
 gmdata.modMenus = {
 	name = "Mod options",
 	style = gmstyles.scroll,
-	items = {}
+	items = {
+		"lol",
+		"nice",
+	}
 }
 
 -- Note: should be parsable by gmdata.parseMenuInitialisation.

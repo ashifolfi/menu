@@ -1,3 +1,5 @@
+-- Note: **MUST** contain all possible callbacks.
+
 local dummy = {}
 
 -- Config for use by menu.lua
@@ -8,16 +10,16 @@ local config = {}
 function dummy.init(menudata, menu)
 end
 
-function dummy.moveCursor(menudata, menu, newItem)
+function dummy.menuToggle(toggleState, menudata, menu)
 end
 
-function dummy.moveCursorFailed(menudata, menu, itemTried)
+function dummy.moveCursor(success, newItem, menudata, menu)
 end
 
-function dummy.update(menudata, menu, player)
+function dummy.update(menudata, menu, gmconf, player)
 end
 
-function dummy.drawer(v, menudata, menu, goldmenu, gmconf)
+function dummy.drawer(v, menudata, menu, gmconf)
 end
 
 return dummy
