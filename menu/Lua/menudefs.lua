@@ -41,8 +41,8 @@ gmdata.menu = {
 	name = "Main Menu",
 	style = gmstyles.scroll,
 	items = {
-		{gmconst.itemFlag.subMenu, "Mods...", gmdata.modMenus},
-		{gmconst.itemFlag.subMenu, "Menu options...", secondMenu},
+		{GM_ITEMFLAG_SUBMENU, "Mods...", gmdata.modMenus},
+		{GM_ITEMFLAG_SUBMENU, "Menu options...", secondMenu},
 	}
 }
 

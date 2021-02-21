@@ -6,53 +6,6 @@ local gmconst = lua_require("const")
 local gmstyles = lua_require("styles")
 
 --
--- Data definitions.
---
-
-local secondMenu = {
-	name = "A Submenu!",
-	style = gmstyles.static,
-	items = {
-		"lol",
-		"another item!",
-		"static menu!"
-	}
-}
-
-local thirdMenu = {
-	name = "Another Submenu!",
-	style = gmstyles.scroll,
-	items = {
-		"This one scrolls!",
-		"Isn't that neat?",
-	}
-}
-
--- Note: should be parsable by gmdata.parseMenuInitialisation.
-gmdata.menu = {
-	name = "Main Menu",
-	style = gmstyles.scroll,
-	items = {
-		{gmconst.itemFlag.subMenu, "A submenu...", secondMenu},
-		{gmconst.itemFlag.subMenu, "Another submenu...", thirdMenu},
-		"line 2",
-		"short",
-		"line 3",
-		"scroll menu!",
-		"",
-		"",
-		"",
-		"",
-		"",
-		"",
-		"",
-		"",
-		"Secrets?",
-		"I just LOOOVE secrets!",
-	}
-}
-
---
 -- Menu management; menu registration is handled by the api or through other functions.
 --
 
@@ -208,7 +161,7 @@ function gmdata.parseItemInitialisation(itemInit)
 
 	local newItem = gmdata.newItem(flags, text, data)
 
-	if newItem.flags == gmconst.itemFlag.subMenu then
+	if newItem.flags == GM_ITEMFLAG_SUBMENU then
 		newItem.data = gmdata.parseMenuInitialisation($)
 	end
 

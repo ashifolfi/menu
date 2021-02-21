@@ -32,34 +32,34 @@ end
 function gmcontrols.getMenuControls(player)
 	-- Pressed controls
 	if not player.goldmenu.pressed then
-		-- [gmconst.control.*] = tics pressed
+		-- [GM_CONTROL_*] = tics pressed
 		player.goldmenu.pressed = {}
 	end
 
 	local cmd = player.cmd
 
 	-- gather movement controls
-	player.goldmenu.pressed[gmconst.control.moveUp] = gmcontrols.runConditionalTimer($, cmd.forwardmove > 0)
-	player.goldmenu.pressed[gmconst.control.moveDown] = gmcontrols.runConditionalTimer($, cmd.forwardmove < 0)
+	player.goldmenu.pressed[GM_CONTROL_MOVEUP] = gmcontrols.runConditionalTimer($, cmd.forwardmove > 0)
+	player.goldmenu.pressed[GM_CONTROL_MOVEDOWN] = gmcontrols.runConditionalTimer($, cmd.forwardmove < 0)
 
-	player.goldmenu.pressed[gmconst.control.moveLeft] = gmcontrols.runConditionalTimer($, -cmd.sidemove > 0)
-	player.goldmenu.pressed[gmconst.control.moveRight] = gmcontrols.runConditionalTimer($, -cmd.sidemove < 0)
+	player.goldmenu.pressed[GM_CONTROL_MOVELEFT] = gmcontrols.runConditionalTimer($, -cmd.sidemove > 0)
+	player.goldmenu.pressed[GM_CONTROL_MOVERIGHT] = gmcontrols.runConditionalTimer($, -cmd.sidemove < 0)
 
 	-- gather camera controls
 	local aimdiff = cmd.aiming - player.goldmenu.prevaiming
 	local turndiff = (cmd.angleturn - player.goldmenu.prevangleturn) & ~1
 
-	player.goldmenu.pressed[gmconst.control.cameraUp] = gmcontrols.runConditionalTimer($, aimdiff > 0)
-	player.goldmenu.pressed[gmconst.control.cameraDown] = gmcontrols.runConditionalTimer($, aimdiff < 0)
+	player.goldmenu.pressed[GM_CONTROL_CAMERAUP] = gmcontrols.runConditionalTimer($, aimdiff > 0)
+	player.goldmenu.pressed[GM_CONTROL_CAMERADOWN] = gmcontrols.runConditionalTimer($, aimdiff < 0)
 
-	player.goldmenu.pressed[gmconst.control.cameraLeft] = gmcontrols.runConditionalTimer($, turndiff > 0)
-	player.goldmenu.pressed[gmconst.control.cameraRight] = gmcontrols.runConditionalTimer($, turndiff < 0)
+	player.goldmenu.pressed[GM_CONTROL_CAMERALEFT] = gmcontrols.runConditionalTimer($, turndiff > 0)
+	player.goldmenu.pressed[GM_CONTROL_CAMERARIGHT] = gmcontrols.runConditionalTimer($, turndiff < 0)
 
 	-- gather weapon number controls
 	local weaponNum = cmd.buttons & BT_WEAPONMASK
 
 	for i = 1, BT_WEAPONMASK do
-		player.goldmenu.pressed[gmconst.control.weapon1 + i - 1] = gmcontrols.runConditionalTimer($, i == weaponNum)
+		player.goldmenu.pressed[GM_CONTROL_WEAPON1 + i - 1] = gmcontrols.runConditionalTimer($, i == weaponNum)
 	end
 
 	-- go through the rest of the buttons as a truth table

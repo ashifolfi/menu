@@ -40,8 +40,6 @@ function goldmenu.registerMenu(menu)
 	table.insert(gmdata.modMenu, menu)
 end
 
-goldmenu.control = gmconst.control
-goldmenu.bind = gmconst.menuBind
 goldmenu.bindPressed = gmcontrols.menuBindPressed
 
 setmetatable(goldmenu, {__metatable = true})

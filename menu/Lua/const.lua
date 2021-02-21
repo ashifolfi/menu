@@ -1,127 +1,146 @@
 -- GoldMenu constants.
 
-local gmconst = {}
+local const = {
 
--- Selectable controls
-gmconst.control = {
-	moveUp = 1,
-	moveDown = 2,
-	moveLeft = 3,
-	moveRight = 4,
-	cameraUp = 5,
-	cameraDown = 6,
-	cameraLeft = 7,
-	cameraRight = 8,
+	// Selectable controls
 
-	jump = 9,
-	spin = 10,
-	firePrimary = 11,
-	fireSecondary = 12,
-	tossFlag = 13,
-	custom1 = 14,
-	custom2 = 15,
-	custom3 = 16,
+	GM_CONTROL_NULL = 0,
 
-	weaponPrev = 17,
-	weaponNext = 18,
+	GM_CONTROL_MOVEUP = 1,
+	GM_CONTROL_MOVEDOWN = 2,
+	GM_CONTROL_MOVELEFT = 3,
+	GM_CONTROL_MOVERIGHT = 4,
+	GM_CONTROL_CAMERAUP = 5,
+	GM_CONTROL_CAMERADOWN = 6,
+	GM_CONTROL_CAMERALEFT = 7,
+	GM_CONTROL_CAMERARIGHT = 8,
 
-	weapon1 = 19,
-	weapon2 = 20,
-	weapon3 = 21,
-	weapon4 = 22,
-	weapon5 = 23,
-	weapon6 = 24,
-	weapon7 = 25,
-	weapon8 = 26,
-	weapon9 = 27,
-	weapon10 = 28,
-	weapon11 = 29,
-	weapon12 = 30,
-	weapon13 = 31,
-	weapon14 = 32,
-	weapon15 = 33,
-	weapon16 = 34,
+	GM_CONTROL_JUMP = 9,
+	GM_CONTROL_SPIN = 10,
+	GM_CONTROL_FIREPRIMARY = 11,
+	GM_CONTROL_FIRESECONDARY = 12,
+	GM_CONTROL_TOSSFLAG = 13,
+	GM_CONTROL_CUSTOM1 = 14,
+	GM_CONTROL_CUSTOM2 = 15,
+	GM_CONTROL_CUSTOM3 = 16,
+
+	GM_CONTROL_WEAPONPREV = 17,
+	GM_CONTROL_WEAPONNEXT = 18,
+
+	GM_CONTROL_WEAPON1 = 19,
+	GM_CONTROL_WEAPON2 = 20,
+	GM_CONTROL_WEAPON3 = 21,
+	GM_CONTROL_WEAPON4 = 22,
+	GM_CONTROL_WEAPON5 = 23,
+	GM_CONTROL_WEAPON6 = 24,
+	GM_CONTROL_WEAPON7 = 25,
+	GM_CONTROL_WEAPON8 = 26,
+	GM_CONTROL_WEAPON9 = 27,
+	GM_CONTROL_WEAPON10 = 28,
+	GM_CONTROL_WEAPON11 = 29,
+	GM_CONTROL_WEAPON12 = 30,
+	GM_CONTROL_WEAPON13 = 31,
+	GM_CONTROL_WEAPON14 = 32,
+	GM_CONTROL_WEAPON15 = 33,
+	GM_CONTROL_WEAPON16 = 34,
+
+	GM_CONTROL_MAX = 35,
+
+	// Menu binds
+
+	GM_MENUBIND_NULL = 0,
+
+	GM_MENUBIND_OPEN = 1,
+	GM_MENUBIND_UP = 2,
+	GM_MENUBIND_DOWN = 3,
+	GM_MENUBIND_SELECT = 4,
+	GM_MENUBIND_BACK = 5,
+
+	GM_MENUBIND_MAX = 6,
+
+	// Menu item flags
+
+	GM_ITEMFLAG_NONE = 0,
+	GM_ITEMFLAG_SUBMENU = 1,
 }
 
-gmconst.control.null = 0
+const.GM_CONTROL_MAXATTAINABLE = const.GM_CONTROL_WEAPON1 + 7 - 1
 
-gmconst.control.max = 35
-gmconst.control.maxAttainable = gmconst.control.weapon1 + 7 - 1
+for k, v in pairs(const) do
+	rawset(_G, k, v)
+end
+
+local gmconst = {}
 
 -- Converts a menu control to a string..
 gmconst.controlToString = {
-	[gmconst.control.null] = "None",
+	[GM_CONTROL_NULL] = "None",
 
-	[gmconst.control.moveUp] = "Move Forward",
-	[gmconst.control.moveDown] = "Move Backward",
-	[gmconst.control.moveLeft] = "Move Left",
-	[gmconst.control.moveRight] = "Move Right",
+	[GM_CONTROL_MOVEUP] = "Move Forward",
+	[GM_CONTROL_MOVEDOWN] = "Move Backward",
+	[GM_CONTROL_MOVELEFT] = "Move Left",
+	[GM_CONTROL_MOVERIGHT] = "Move Right",
 
-	[gmconst.control.cameraUp] = "Look Up",
-	[gmconst.control.cameraDown] = "Look Down",
-	[gmconst.control.cameraLeft] = "Look Left",
-	[gmconst.control.cameraRight] = "Look Right",
+	[GM_CONTROL_CAMERAUP] = "Look Up",
+	[GM_CONTROL_CAMERADOWN] = "Look Down",
+	[GM_CONTROL_CAMERALEFT] = "Look Left",
+	[GM_CONTROL_CAMERARIGHT] = "Look Right",
 
-	[gmconst.control.jump] = "Jump",
-	[gmconst.control.spin] = "Spin",
+	[GM_CONTROL_JUMP] = "Jump",
+	[GM_CONTROL_SPIN] = "Spin",
 
-	[gmconst.control.firePrimary] = "Fire",
-	[gmconst.control.fireSecondary] = "Fire Normal",
-	[gmconst.control.tossFlag] = "Toss Flag",
-	[gmconst.control.custom1] = "Custom Action 1",
-	[gmconst.control.custom2] = "Custom Action 2",
-	[gmconst.control.custom3] = "Custom Action 3",
+	[GM_CONTROL_FIREPRIMARY] = "Fire",
+	[GM_CONTROL_FIRESECONDARY] = "Fire Normal",
+	[GM_CONTROL_TOSSFLAG] = "Toss Flag",
+	[GM_CONTROL_CUSTOM1] = "Custom Action 1",
+	[GM_CONTROL_CUSTOM2] = "Custom Action 2",
+	[GM_CONTROL_CUSTOM3] = "Custom Action 3",
 
-	[gmconst.control.weaponPrev] = "Prev Weapon",
-	[gmconst.control.weaponNext] = "Next Weapon",
+	[GM_CONTROL_WEAPONPREV] = "Prev Weapon",
+	[GM_CONTROL_WEAPONNEXT] = "Next Weapon",
 
-	[gmconst.control.weapon1] = "Weapon 1",
-	[gmconst.control.weapon2] = "Weapon 2",
-	[gmconst.control.weapon3] = "Weapon 3",
-	[gmconst.control.weapon4] = "Weapon 4",
-	[gmconst.control.weapon5] = "Weapon 5",
-	[gmconst.control.weapon6] = "Weapon 6",
-	[gmconst.control.weapon7] = "Weapon 7",
+	[GM_CONTROL_WEAPON1] = "Weapon 1",
+	[GM_CONTROL_WEAPON2] = "Weapon 2",
+	[GM_CONTROL_WEAPON3] = "Weapon 3",
+	[GM_CONTROL_WEAPON4] = "Weapon 4",
+	[GM_CONTROL_WEAPON5] = "Weapon 5",
+	[GM_CONTROL_WEAPON6] = "Weapon 6",
+	[GM_CONTROL_WEAPON7] = "Weapon 7",
 
-	[gmconst.control.weapon8] = "Weapon 8",
-	[gmconst.control.weapon9] = "Weapon 9",
-	[gmconst.control.weapon10] = "Weapon 10",
-	[gmconst.control.weapon11] = "Weapon 11",
-	[gmconst.control.weapon12] = "Weapon 12",
-	[gmconst.control.weapon13] = "Weapon 13",
-	[gmconst.control.weapon14] = "Weapon 14",
+	[GM_CONTROL_WEAPON8] = "Weapon 8",
+	[GM_CONTROL_WEAPON9] = "Weapon 9",
+	[GM_CONTROL_WEAPON10] = "Weapon 10",
+	[GM_CONTROL_WEAPON11] = "Weapon 11",
+	[GM_CONTROL_WEAPON12] = "Weapon 12",
+	[GM_CONTROL_WEAPON13] = "Weapon 13",
+	[GM_CONTROL_WEAPON14] = "Weapon 14",
 
-	[gmconst.control.weapon15] = "Weapon 15",
-	[gmconst.control.weapon16] = "Weapon 16"
+	[GM_CONTROL_WEAPON15] = "Weapon 15",
+	[GM_CONTROL_WEAPON16] = "Weapon 16"
+}
+
+gmconst.menuBindToString = {
+	[GM_MENUBIND_OPEN] = "Open",
+	[GM_MENUBIND_UP] = "Up",
+	[GM_MENUBIND_DOWN] = "Down",
+	[GM_MENUBIND_SELECT] = "Select",
+	[GM_MENUBIND_BACK] = "Back",
 }
 
 -- converts button inputs (where possible) into menu controls directly.
 gmconst.playerButtonToControl = {
-	[BT_WEAPONNEXT] = gmconst.control.weaponNext,
-	[BT_WEAPONPREV] = gmconst.control.weaponPrev,
+	[BT_WEAPONNEXT] = GM_CONTROL_WEAPONNEXT,
+	[BT_WEAPONPREV] = GM_CONTROL_WEAPONPREV,
 
-	[BT_ATTACK]     = gmconst.control.firePrimary,
-	[BT_SPIN]       = gmconst.control.spin,
-	[BT_TOSSFLAG]   = gmconst.control.tossFlag,
-	[BT_JUMP]       = gmconst.control.jump,
-	[BT_FIRENORMAL] = gmconst.control.fireSecondary,
+	[BT_ATTACK]     = GM_CONTROL_FIREPRIMARY,
+	[BT_SPIN]       = GM_CONTROL_SPIN,
+	[BT_TOSSFLAG]   = GM_CONTROL_TOSSFLAG,
+	[BT_JUMP]       = GM_CONTROL_JUMP,
+	[BT_FIRENORMAL] = GM_CONTROL_FIRESECONDARY,
 
-	[BT_CUSTOM1]    = gmconst.control.custom1,
-	[BT_CUSTOM2]    = gmconst.control.custom2,
-	[BT_CUSTOM3]    = gmconst.control.custom3,
-}
-
-gmconst.menuBind = {
-	open = 1,
-	up = 2,
-	down = 3,
-	select = 4,
-	back = 5,
-}
-
-gmconst.itemFlag = {
-	none = 0,
-	subMenu = 1
+	[BT_CUSTOM1]    = GM_CONTROL_CUSTOM1,
+	[BT_CUSTOM2]    = GM_CONTROL_CUSTOM2,
+	[BT_CUSTOM3]    = GM_CONTROL_CUSTOM3,
 }
 
 return gmconst

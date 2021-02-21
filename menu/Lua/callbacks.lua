@@ -39,7 +39,7 @@ function gmcallbacks.menuInit(player)
 	goldmenu.binds = {} -- binds buttons to menu actions.
 
 	-- register keybinds.
-	for menuBind, control in pairs(gmconf.defaultBinds) do
+	for menuBind, control in ipairs(gmconf.defaultBinds) do
 		goldmenu.binds[menuBind] = control
 	end
 
@@ -112,7 +112,7 @@ end
 
 local function singleMenuThink(i, goldmenu, player)
 	-- determine if the open bind has been pressed.
-	local openPressed = gmcontrols.menuBindPressed(goldmenu, gmconst.menuBind.open)
+	local openPressed = gmcontrols.menuBindPressed(goldmenu, GM_MENUBIND_OPEN)
 	local activeMenu = i == goldmenu.curMenu
 
 	local menu = goldmenu.menus[i]
@@ -135,11 +135,11 @@ local function singleMenuThink(i, goldmenu, player)
 	end
 
 	if goldmenu.open and activeMenu then
-		local upTics = gmcontrols.menuBindPressed(goldmenu, gmconst.menuBind.up)
-		local downTics = gmcontrols.menuBindPressed(goldmenu, gmconst.menuBind.down)
+		local upTics = gmcontrols.menuBindPressed(goldmenu, GM_MENUBIND_UP)
+		local downTics = gmcontrols.menuBindPressed(goldmenu, GM_MENUBIND_DOWN)
 
-		local selectTics = gmcontrols.menuBindPressed(goldmenu, gmconst.menuBind.select)
-		local backTics = gmcontrols.menuBindPressed(goldmenu, gmconst.menuBind.back)
+		local selectTics = gmcontrols.menuBindPressed(goldmenu, GM_MENUBIND_SELECT)
+		local backTics = gmcontrols.menuBindPressed(goldmenu, GM_MENUBIND_BACK)
 
 		if upTics == 1 or (upTics > gmconf.holdWait and (leveltime % gmconf.ticsBetweenHoldAdvance) == 0) then
 			menu.prevCursorPos = menu.cursorPos
@@ -163,8 +163,10 @@ local function singleMenuThink(i, goldmenu, player)
 			end
 		end
 
-		if selectTics == 1 and curItem and curItem.flags == gmconst.itemFlag.subMenu and type(curItem.data) == "table" then
-			pushMenu(goldmenu, curItem.data)
+		if selectTics == 1 and curItem then
+			if curItem.flags == GM_ITEMFLAG_SUBMENU and type(curItem.data) == "table" then
+				pushMenu(goldmenu, curItem.data)
+			end
 		end
 
 		if backTics == 1 then
@@ -172,7 +174,7 @@ local function singleMenuThink(i, goldmenu, player)
 				popMenu(goldmenu)
 			else
 				goldmenu.open = not $
-				goldmenu.heldControlLock = goldmenu.binds[gmconst.menuBind.back]
+				goldmenu.heldControlLock = goldmenu.binds[GM_MENUBIND_BACK]
 
 				menu.style.menuToggle(goldmenu.open, menudata, menu)
 			end
@@ -190,7 +192,7 @@ function gmcallbacks.doMenu(player)
 	local goldmenu = player.goldmenu
 
 	-- determine if the open bind has been pressed.
-	local openPressed = gmcontrols.menuBindPressed(goldmenu, gmconst.menuBind.open)
+	local openPressed = gmcontrols.menuBindPressed(goldmenu, GM_MENUBIND_OPEN)
 
 	-- has it been pressed for < 1 tic?
 	if openPressed == 1 then
@@ -268,7 +270,7 @@ function gmcallbacks.drawMenu(v, player)
 		if gmdebug then
 			v.drawString(0, 200 - 8, goldmenu.fadeStrength, strFlags)
 
-			for i = 1, gmconst.control.maxAttainable do
+			/*for i = 1, GM_CONTROL_MAXATTAINABLE do
 				local iv = goldmenu.pressed[i]
 
 				if iv == nil then
@@ -277,6 +279,17 @@ function gmcallbacks.drawMenu(v, player)
 
 				v.drawString(0, (i - 1) * 4, gmconst.controlToString[i] or "???", strFlags, "small")
 				v.drawString(80, (i - 1) * 4, iv, strFlags, "small-right")
+			end*/
+
+			for i = 1, GM_MENUBIND_MAX do
+				local iv = goldmenu.binds[i]
+
+				if iv == nil then
+					continue
+				end
+
+				v.drawString(0, (i - 1) * 4, gmconst.menuBindToString[i] or "???", strFlags, "small")
+				v.drawString(80, (i - 1) * 4, goldmenu.pressed[iv], strFlags, "small-right")
 			end
 		end
 
