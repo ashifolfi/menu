@@ -68,6 +68,7 @@ function gmcallbacks.doMenu(player)
 	-- has it been pressed for < 1 tic?
 	if openPressed == 1 then
 		goldmenu.open = not $ -- toggle menu
+		goldmenu.menus[goldmenu.curMenu].open = true
 	end
 
 	for i, menu in ipairs(goldmenu.menus) do
@@ -115,7 +116,8 @@ function gmcallbacks.doMenu(player)
 				end
 			end
 
-			if selectTics == 1 and curItem.flags == gmconst.itemFlag.subMenu and type(curItem.data) == "table" then
+			if selectTics == 1 and curItem
+			and curItem.flags == gmconst.itemFlag.subMenu and type(curItem.data) == "table" then
 				local curMenu = goldmenu.curMenu
 				local newCurMenu = curMenu + 1
 
@@ -155,10 +157,6 @@ function gmcallbacks.doMenu(player)
 
 					menu = goldmenu.menus[newCurMenu]
 					menudata = goldmenu.menudata[newCurMenu]
-
-					menudata.fadeStrength = goldmenu.menudata[curMenu].fadeStrength
-					menudata.fadeProgress = goldmenu.menudata[curMenu].fadeProgress
-					menudata.transparency = goldmenu.menudata[curMenu].transparency
 				else
 					goldmenu.open = not $
 					goldmenu.heldControlLock = goldmenu.binds[gmconst.menuBind.back]

@@ -45,6 +45,10 @@ function scroll.update(menudata)
 	menudata.transitionFrac = $ + FixedMul(FRACUNIT - $, config.scrollSpeed)
 end
 
+local function drawMenuTitle(v, config, menu, gmconf, strFlags)
+	v.drawString(160, config.titleY, menu.name, gmconf.selectionColor|strFlags, config.titleFont)
+end
+
 function scroll.drawer(v, menudata, menu, gmconf)
 	local strFlags = V_ALLOWLOWERCASE|menudata.transparency
 	local patchFlags = menudata.transparency
@@ -54,8 +58,15 @@ function scroll.drawer(v, menudata, menu, gmconf)
 
 	local cursorPercentage = menudata.transitionFrac
 
+	if not #menu.items then
+		v.drawString(160, 100 - 4, "Menu is empty.", strFlags, config.fontAligned)
+		drawMenuTitle(v, config, menu, gmconf, strFlags)
+		return
+	end
+
 	if not menu.items[menudata.cursorPos] then
 		v.drawString(160, 100 - 4, string.format("ERROR: Cannot access menu, item %d", menudata.cursorPos), strFlags, config.fontAligned)
+		drawMenuTitle(v, config, menu, gmconf, strFlags)
 		return
 	end
 
@@ -109,7 +120,7 @@ function scroll.drawer(v, menudata, menu, gmconf)
 		v.drawString(160, y, line, localStrFlags, config.fontAligned)
 	end
 
-	v.drawString(160, config.titleY, menu.name, gmconf.selectionColor|strFlags, config.titleFont)
+	drawMenuTitle(v, config, menu, gmconf, strFlags)
 
 	//v.drawFill(0, 100, 320, 1, 24)
 end

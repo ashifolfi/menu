@@ -52,8 +52,6 @@ gmdata.menu = {
 	}
 }
 
-gmdata.modMenus = {}
-
 --
 -- Menu management; menu registration is handled by the api or through other functions.
 --
@@ -114,6 +112,8 @@ function gmdata.newMenu(menuname, style, itemTable, parent)
 	newMenu.style = style or gmstyles.scroll
 
 	newMenu.parent = parent -- parent menu
+
+	newMenu.open = false
 
 	return newMenu
 end
@@ -241,7 +241,5 @@ function gmdata.parseMenuInitialisation(menuInit)
 
 	return gmdata.newMenu(name, style or gmstyles.scroll, itemTable)
 end
-
-gmdata.menu = gmdata.parseMenuInitialisation($)
 
 return gmdata

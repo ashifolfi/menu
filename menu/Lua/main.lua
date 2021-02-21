@@ -24,6 +24,7 @@ local gmconf = lua_require("conf") -- GoldMenu configuration. // depends: 'const
 local gmcontrols = lua_require("controls") -- Misc. functions // depends: 'conf', 'const'
 local gmdata = lua_require("data") -- Data management and structure definition. // depends: 'const', 'styles'
 
+local gmmenudefs = lua_require("menudefs") -- Defines default menus. // depends: 'const', 'data', 'styles'
 local gmapi = lua_require("api") -- Lua scripter API. // depends: 'const', 'control', 'data'
 local gmcallbacks = lua_require("callbacks") -- Hooked functions. // depends: 'debug', 'controls', 'conf', 'const', 'util', 'data', 'styles'
 
