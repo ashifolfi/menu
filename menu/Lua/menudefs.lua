@@ -43,6 +43,7 @@ gmdata.menu = {
 	items = {
 		{GM_ITEMFLAG_SUBMENU, "Mods...", gmdata.modMenus},
 		{GM_ITEMFLAG_SUBMENU, "Menu options...", secondMenu},
+		{GM_ITEMFLAG_SCROLL, "A slider!", nil}
 	}
 }
 
