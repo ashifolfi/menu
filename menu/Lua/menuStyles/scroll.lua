@@ -31,17 +31,16 @@ local function getScrollFactor(menu, index)
 
 	index = $ or menu.cursorPos
 
+	local lastScrollFactor = 0
+
 	for i = 1, index do
 		local item = menu.items[i]
 
-		local thisScrollFactor = (menuItemHeights[item.flags] or 1) * FRACUNIT
-
-		if i ~= index then
-			scrollFactor = $ + thisScrollFactor
-		else
-			scrollFactor = $ + thisScrollFactor/2
-		end
+		scrollFactor = $ + lastScrollFactor
+		lastScrollFactor = ((menuItemHeights[item.flags] or 1) * FRACUNIT)
 	end
+
+	scrollFactor = $ + lastScrollFactor/2
 
 	return scrollFactor
 end
@@ -211,6 +210,8 @@ function scroll.drawer(v, menudata, menu, gmconf)
 
 		local realY = (y + FRACUNIT/2) / FRACUNIT -- round nicely
 
+		y = $ + (heightMul * config.lineSize * FRACUNIT) / 2 -- move y position other half of line
+
 		-- only make the closest peak opaque!
 		if transparency > 90*FRACUNIT
 		or transparency < -90*FRACUNIT then
@@ -235,8 +236,6 @@ function scroll.drawer(v, menudata, menu, gmconf)
 		end
 
 		drawMenuItem(item.flags, v, realY, line, localStrFlags)
-
-		y = $ + (heightMul * config.lineSize * FRACUNIT) / 2 -- move y position other half of line
 	end
 
 	drawMenuTitle(v, config, menu, gmconf, strFlags, transparency)
