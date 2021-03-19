@@ -132,13 +132,13 @@ local menuItemDrawers = {
 
 		local halfMidPieces = 8
 
-		v.draw(160 - (halfMidPieces) * mid.width - left.width, newY, left, transparency)
+		v.draw(160 - (halfMidPieces) * mid.width - left.width - 2, newY, left, transparency)
 
 		for i = -halfMidPieces + 1, halfMidPieces do
 			v.draw(160 - i * mid.width, newY, mid, transparency)
 		end
 
-		v.draw(160 + (halfMidPieces - 1) * mid.width + right.width, newY, right, transparency)
+		v.draw(160 + (halfMidPieces - 1) * mid.width + right.width + 2, newY, right, transparency)
 
 		local angle = FixedAngle(2 * leveltime * FRACUNIT)
 
@@ -230,12 +230,13 @@ function scroll.drawer(v, menudata, menu, gmconf)
 		transparency = gmutil.fixedLerp(0, 10, FRACUNIT - $) << FF_TRANSSHIFT
 
 		local localStrFlags = (strFlags & ~V_ALPHAMASK) | transparency
+		local localPatchFlags = (strFlags & ~V_ALPHAMASK) | transparency
 
 		if i == menu.cursorPos then
 			localStrFlags = ($ & ~V_CHARCOLORMASK) | gmconf.selectionColor
 		end
 
-		drawMenuItem(item.flags, v, realY, line, localStrFlags)
+		drawMenuItem(item.flags, v, realY, line, localStrFlags, transparency)
 	end
 
 	drawMenuTitle(v, config, menu, gmconf, strFlags, transparency)
