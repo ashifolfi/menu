@@ -22,12 +22,6 @@ function gmcontrols.runConditionalTimer(timer, condition)
 	return timer
 end
 
--- i don't want too many double table accesses in my code so i'm doing this
--- Determines how long a button corresponding to a menu bind has been pressed, in tics.
-function gmcontrols.menuBindPressed(goldmenu, menuBind)
-	return goldmenu.pressed[goldmenu.binds[menuBind]]
-end
-
 -- Gathers all the menu controls
 function gmcontrols.getMenuControls(player)
 	-- Pressed controls
