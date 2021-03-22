@@ -23,7 +23,7 @@ config.fontAligned = (#config.font and config.font ~= "normal") and (config.font
 config.font = #$ and $ or "normal"
 
 local menuItemHeights = {
-	[GM_ITEMFLAG_SLIDER] = 2
+	[GM_ITEMTYPE_SLIDER] = 2
 }
 
 local function getScrollFactor(menu, index)
@@ -37,7 +37,7 @@ local function getScrollFactor(menu, index)
 		local item = menu.items[i]
 
 		scrollFactor = $ + lastScrollFactor
-		lastScrollFactor = ((menuItemHeights[item.flags] or 1) * FRACUNIT)
+		lastScrollFactor = ((menuItemHeights[item.type] or 1) * FRACUNIT)
 	end
 
 	scrollFactor = $ + lastScrollFactor/2
@@ -111,7 +111,7 @@ function scroll.update(menudata, menu, gmconf)
 	for i, item in ipairs(menu.items) do
 		menudata.cvarBounds[i] = $ or {}
 
-		if item.flags == GM_ITEMFLAG_SLIDER then
+		if item.type == GM_ITEMTYPE_SLIDER then
 			menudata.cvarBounds[i].min, menudata.cvarBounds[i].max = gmutil.getCvarBounds(item.data)
 		end
 	end
@@ -126,11 +126,11 @@ local function drawMenuTitle(v, config, menu, gmconf, strFlags)
 end
 
 local menuItemDrawers = {
-	[GM_ITEMFLAG_NONE] = function(v, y, line, menudata, item, i, localStrFlags)
+	[GM_ITEMTYPE_NONE] = function(v, y, line, menudata, item, i, localStrFlags)
 		v.drawString(160, y, line, localStrFlags, config.fontAligned)
 	end,
 
-	[GM_ITEMFLAG_SLIDER] = function(v, y, line, menudata, item, i, localStrFlags, transparency)
+	[GM_ITEMTYPE_SLIDER] = function(v, y, line, menudata, item, i, localStrFlags, transparency)
 		v.drawString(160, y - config.lineSize / 2, line, localStrFlags, config.fontAligned)
 		//v.drawString(160, y + config.lineSize / 2, line, localStrFlags, config.fontAligned)
 
@@ -170,7 +170,7 @@ local menuItemDrawers = {
 
 local function drawMenuItem(flags, ...)
 	if not menuItemDrawers[flags] then
-		return menuItemDrawers[GM_ITEMFLAG_NONE](...)
+		return menuItemDrawers[GM_ITEMTYPE_NONE](...)
 	end
 
 	return menuItemDrawers[flags](...)
@@ -201,8 +201,8 @@ function scroll.drawer(v, menudata, menu, gmconf)
 	local width1 = v.stringWidth(menu.items[menu.prevCursorPos].text or "", strFlags, config.font)
 	local width2 = v.stringWidth(menu.items[menu.cursorPos].text or "", strFlags, config.font)
 
-	local heightMul1 = menuItemHeights[menu.items[menu.prevCursorPos].flags] or 1
-	local heightMul2 = menuItemHeights[menu.items[menu.cursorPos].flags] or 1
+	local heightMul1 = menuItemHeights[menu.items[menu.prevCursorPos].type] or 1
+	local heightMul2 = menuItemHeights[menu.items[menu.cursorPos].type] or 1
 
 	local lerpwidth = gmutil.fixedLerp(width1*FRACUNIT, width2*FRACUNIT, menudata.transitionFrac)
 	lerpwidth = ($ + FRACUNIT/2) / FRACUNIT -- round nicely
@@ -222,7 +222,7 @@ function scroll.drawer(v, menudata, menu, gmconf)
 	for i, item in ipairs(menu.items) do
 		local line = item.text
 
-		local heightMul = menuItemHeights[item.flags] or 1
+		local heightMul = menuItemHeights[item.type] or 1
 
 		y = $ + (heightMul * config.lineSize * FRACUNIT) / 2 -- move y position half a line
 
@@ -257,7 +257,7 @@ function scroll.drawer(v, menudata, menu, gmconf)
 			localStrFlags = ($ & ~V_CHARCOLORMASK) | gmconf.selectionColor
 		end
 
-		drawMenuItem(item.flags, v, realY, line, menudata, item, i, localStrFlags, transparency)
+		drawMenuItem(item.type, v, realY, line, menudata, item, i, localStrFlags, transparency)
 	end
 
 	drawMenuTitle(v, config, menu, gmconf, strFlags, transparency)

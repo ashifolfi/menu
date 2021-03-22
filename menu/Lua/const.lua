@@ -60,11 +60,11 @@ local const = {
 
 	GM_MENUBIND_MAX = 8,
 
-	// Menu item flags
+	// Menu item types
 
-	GM_ITEMFLAG_NONE = 0,
-	GM_ITEMFLAG_SUBMENU = 1,
-	GM_ITEMFLAG_SLIDER = 2,
+	GM_ITEMTYPE_NONE = 0,
+	GM_ITEMTYPE_SUBMENU = 1,
+	GM_ITEMTYPE_SLIDER = 2,
 }
 
 const.GM_CONTROL_MAXATTAINABLE = const.GM_CONTROL_WEAPON1 + 7 - 1

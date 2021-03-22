@@ -44,10 +44,10 @@ gmdata.menu = {
 	name = "Main Menu",
 	style = gmstyles.scroll,
 	items = {
-		{GM_ITEMFLAG_SUBMENU, "Mods...", gmdata.modMenus},
-		{GM_ITEMFLAG_SUBMENU, "Menu options...", secondMenu},
-		{GM_ITEMFLAG_SLIDER, "A slider!", cv_slidervar}
-//		{GM_ITEMFLAG_SLIDER, "A slider!", CV_FindVar("con_speed")}
+		{GM_ITEMTYPE_SUBMENU, 0, "Mods...", gmdata.modMenus},
+		{GM_ITEMTYPE_SUBMENU, 0, "Menu options...", secondMenu},
+		{GM_ITEMTYPE_SLIDER, 0, "A slider!", cv_slidervar}
+//		{GM_ITEMTYPE_SLIDER, 0, "A slider!", CV_FindVar("con_speed")}
 	}
 }
 

@@ -31,10 +31,11 @@ local function deleteStructure(struct, deletedStuff)
 end
 
 -- Returns item of format: { string text, int flags, itemTable parent, menu menu, int index }
-function gmdata.newItem(itemflags, itemtext, data)
+function gmdata.newItem(itemtype, itemflags, itemtext, data)
 	local newItem = newStructure(deletedItems)
 
 	-- populate item with values.
+	newItem.type = itemtype or GM_ITEMTYPE_NONE
 	newItem.flags = itemflags or 0
 	newItem.text = itemtext or ""
 	newItem.data = data
@@ -149,19 +150,19 @@ end
 -- Parses item initialisation
 -- Returns item
 function gmdata.parseItemInitialisation(itemInit)
-	local flags, text, data
+	local itemtype, flags, text, data
 
 	if type(itemInit) == "string" then
-		flags, text, data = 0, itemInit, nil
+		itemtype, flags, text, data = 0, 0, itemInit, nil
 	elseif #itemInit then
-		flags, text, data = unpack(itemInit)
+		itemtype, flags, text, data = unpack(itemInit)
 	else
-		flags, text, data = itemInit.flags, itemInit.text, itemInit.data
+		itemtype, flags, text, data = itemInit.type, itemInit.flags, itemInit.text, itemInit.data
 	end
 
-	local newItem = gmdata.newItem(flags, text, data)
+	local newItem = gmdata.newItem(itemtype, flags, text, data)
 
-	if newItem.flags == GM_ITEMFLAG_SUBMENU then
+	if newItem.type == GM_ITEMTYPE_SUBMENU then
 		newItem.data = gmdata.parseMenuInitialisation($)
 	end
 

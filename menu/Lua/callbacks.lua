@@ -175,7 +175,7 @@ local function singleMenuThink(i, goldmenu, player)
 		end
 
 		if curItem then
-			if curItem.flags == GM_ITEMFLAG_SLIDER and userdataType(curItem.data) == "consvar_t" then
+			if curItem.type == GM_ITEMTYPE_SLIDER and userdataType(curItem.data) == "consvar_t" then
 				if not goldmenu.bindPressed[goldmenu.pressedCvarIncrementKey] then
 					goldmenu.pressedCvarIncrementKey = GM_MENUBIND_NULL
 					goldmenu.cvarIncrementVelocity = 0
@@ -220,7 +220,7 @@ local function singleMenuThink(i, goldmenu, player)
 					goldmenu.cvarIncrementDecimal = 0
 				end
 
-			elseif curItem.flags == GM_ITEMFLAG_SUBMENU and type(curItem.data) == "table" then
+			elseif curItem.type == GM_ITEMTYPE_SUBMENU and type(curItem.data) == "table" then
 				if selectTics == 1 then
 					pushMenu(goldmenu, curItem.data)
 				end
