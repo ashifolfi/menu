@@ -25,8 +25,10 @@ local gmcontrols = lua_require("controls") -- Misc. functions // depends: 'conf'
 local gmdata = lua_require("data") -- Data management and structure definition. // depends: 'const', 'styles'
 
 local gmmenudefs = lua_require("menudefs") -- Defines default menus. // depends: 'const', 'data', 'styles'
+local gmvars = lua_require("vars") -- Functions to manipulate goldmenu player-specific variables. // depends: 'conf', 'const', 'data'
 local gmapi = lua_require("api") -- Lua scripter API. // depends: 'const', 'control', 'data'
-local gmcallbacks = lua_require("callbacks") -- Hooked functions. // depends: 'debug', 'controls', 'conf', 'const', 'util', 'data', 'styles'
+local gmitemhandlers = lua_require("itemhandlers") -- Defines default menus.
+local gmcallbacks = lua_require("callbacks") -- Hooked functions. // depends: 'debug', 'controls', 'conf', 'const', 'util', 'data', 'styles', 'vars'
 
 -- crappy hooks that i have to do to get srb2 to run our functions
 

@@ -8,115 +8,19 @@ local gmconst = lua_require("const")
 local gmutil = lua_require("util")
 local gmdata = lua_require("data")
 local gmstyles = lua_require("styles")
+local gmvars = lua_require("vars")
+local gmitemhandlers = lua_require("itemhandlers")
 
 -- logic and stuff
 
-local function initMenuData()
-	local menudata = {}
-
-	return menudata
-end
-
 function gmcallbacks.menuInit(player)
-	player.goldmenu = {}
-
-	local goldmenu = player.goldmenu
-
-	goldmenu.open = false -- are we open?????????
-	goldmenu.heldControlLock = 0 -- Locks the controls while one is held.
-
-	-- background fading vars.
-	goldmenu.fadeStrength = 0
-	goldmenu.fadeProgress = 0
-	goldmenu.transparency = 0
-
-	-- cvar manipulation vars
-	goldmenu.cvarIncrementAcceleration = FRACUNIT
-	goldmenu.pressedCvarIncrementKey = GM_MENUBIND_NULL
-	goldmenu.cvarIncrementDecimal = 0 -- decimal part of increment..
-
-	goldmenu.pressed = {} -- pressed buttons.
-
-	-- previous button actions. maybe should go into goldmenu.pressed.prev.*?
-	goldmenu.prevangleturn = player.cmd.angleturn
-	goldmenu.prevaiming = player.cmd.aiming
-
-	goldmenu.binds = {} -- binds buttons to menu actions.
-
-	-- register keybinds.
-	for menuBind, control in ipairs(gmconf.defaultBinds) do
-		goldmenu.binds[menuBind] = control
-	end
-
-	// a wrapper for checking if a bind is pressed
-	goldmenu.bindPressed = {}
-	setmetatable(goldmenu.bindPressed, {__index = function(t, k) return goldmenu.pressed[goldmenu.binds[k]] end})
-
-	-- menus; the last item is the current menu.
-	-- array'd because we might want to draw over another menu!
-	goldmenu.menus = {gmdata.menu} -- automatically load the main menu
-	goldmenu.menudata = {}
-	table.insert(goldmenu.menudata, initMenuData())
-
-	goldmenu.curMenu = #goldmenu.menus
+	local goldmenu = gmvars.newGoldMenu(player)
 
 	local menu = goldmenu.menus[goldmenu.curMenu]
 	local menudata = goldmenu.menudata[goldmenu.curMenu]
 
 	menu.style.init(menudata, menu)
 	menu.open = true
-end
-
-local function setMenuOpen(open, menu, menudata)
-	menu.open = open
-	menu.style.menuToggle(menu.open, menudata, menu)
-end
-
-local function pushMenu(goldmenu, newMenu)
-	local menu = goldmenu.menus[goldmenu.curMenu]
-	local menudata = goldmenu.menudata[goldmenu.curMenu]
-
-	local curMenu = goldmenu.curMenu
-	local newCurMenu = curMenu + 1
-
-	local alreadyInited = goldmenu.menus[newCurMenu] == newMenu
-
-	goldmenu.curMenu = newCurMenu
-
-	if not alreadyInited then
-		goldmenu.menus[newCurMenu] = newMenu
-		goldmenu.menudata[newCurMenu] = initMenuData()
-	end
-
-	menu = goldmenu.menus[newCurMenu]
-	menudata = goldmenu.menudata[newCurMenu]
-
-	if not alreadyInited then
-		menu.style.init(menudata, menu)
-	end
-
-	menu.open = true
-	menu.style.menuToggle(menu.open, menudata, menu)
-
-	return menu, menudata
-end
-
-local function popMenu(goldmenu)
-	local menu = goldmenu.menus[goldmenu.curMenu]
-	local menudata = goldmenu.menudata[goldmenu.curMenu]
-
-	local curMenu = goldmenu.curMenu
-	local newCurMenu = curMenu - 1
-
-	menu.open = false
-	menu.style.menuToggle(menu.open, menudata, menu)
-
-	goldmenu.curMenu = newCurMenu
-
-	menu = goldmenu.menus[newCurMenu]
-	menudata = goldmenu.menudata[newCurMenu]
-
-	return menu, menudata
 end
 
 local function singleMenuThink(i, goldmenu, player)
@@ -146,8 +50,6 @@ local function singleMenuThink(i, goldmenu, player)
 	if goldmenu.open and activeMenu then
 		local upTics = goldmenu.bindPressed[GM_MENUBIND_UP]
 		local downTics = goldmenu.bindPressed[GM_MENUBIND_DOWN]
-		local leftTics = goldmenu.bindPressed[GM_MENUBIND_LEFT]
-		local rightTics = goldmenu.bindPressed[GM_MENUBIND_RIGHT]
 
 		local selectTics = goldmenu.bindPressed[GM_MENUBIND_SELECT]
 		local backTics = goldmenu.bindPressed[GM_MENUBIND_BACK]
@@ -175,61 +77,12 @@ local function singleMenuThink(i, goldmenu, player)
 		end
 
 		if curItem then
-			if curItem.type == GM_ITEMTYPE_SLIDER and userdataType(curItem.data) == "consvar_t" then
-				if not goldmenu.bindPressed[goldmenu.pressedCvarIncrementKey] then
-					goldmenu.pressedCvarIncrementKey = GM_MENUBIND_NULL
-					goldmenu.cvarIncrementVelocity = 0
-				end
-
-				goldmenu.pressedCvarIncrementKey = $ or (leftTics and GM_MENUBIND_LEFT) or (rightTics and GM_MENUBIND_RIGHT) or GM_MENUBIND_NULL
-
-				if goldmenu.pressedCvarIncrementKey then
-					local sign = (goldmenu.pressedCvarIncrementKey == GM_MENUBIND_RIGHT and 1) or (goldmenu.pressedCvarIncrementKey == GM_MENUBIND_LEFT and -1) or 0
-					local cvar = curItem.data
-
-					local pressedTics = goldmenu.bindPressed[goldmenu.pressedCvarIncrementKey]
-
-					if pressedTics == 1 then
-						COM_BufInsertText(player, cvar.name .. " " .. cvar.value + sign)
-					end
-
-					-- didnt want to keep track of this, but mathematics itself has forced my hand
-					-- fn(x) = xy^(n+1) + (n+1)xy^n + (n+1)xy^(n-1) + ... (n+1)xy^2 + (n+1)xy + x
-					-- for the function f(x) = x + xy
-					goldmenu.cvarIncrementVelocity = $ or 1
-
-					if goldmenu.cvarIncrementVelocity < INT32_MAX then
-						local prevVel = goldmenu.cvarIncrementVelocity
-						goldmenu.cvarIncrementVelocity = $ + (FixedMul($, gmconf.cvarIncrementAcceleration) or 1)
-
-						if goldmenu.cvarIncrementVelocity < prevVel then
-							goldmenu.cvarIncrementVelocity = INT32_MAX
-						end
-					end
-
-					if goldmenu.cvarIncrementVelocity < 1<<15 then
-						goldmenu.cvarIncrementDecimal = $ + gmconf.cvarBaseIncrement * goldmenu.cvarIncrementVelocity
-						COM_BufInsertText(player, cvar.name .. " " .. cvar.value + sign * FixedInt(goldmenu.cvarIncrementDecimal))
-						goldmenu.cvarIncrementDecimal = $ & ~0xFFFF0000 -- decimal only
-					else
-						local inc = sign * FixedMul(goldmenu.cvarIncrementVelocity, gmconf.cvarBaseIncrement)
-						goldmenu.cvarIncrementDecimal = 0
-						COM_BufInsertText(player, cvar.name .. " " .. cvar.value + inc)
-					end
-				else
-					goldmenu.cvarIncrementDecimal = 0
-				end
-
-			elseif curItem.type == GM_ITEMTYPE_SUBMENU and type(curItem.data) == "table" then
-				if selectTics == 1 then
-					pushMenu(goldmenu, curItem.data)
-				end
-			end
+			gmitemhandlers.handleItem(goldmenu, curItem, player)
 		end
 
 		if backTics == 1 then
 			if goldmenu.curMenu > 1 then
-				popMenu(goldmenu)
+				gmvars.popMenu(goldmenu)
 			else
 				goldmenu.open = not $
 				goldmenu.heldControlLock = goldmenu.binds[GM_MENUBIND_BACK]
