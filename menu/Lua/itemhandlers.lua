@@ -4,7 +4,7 @@ local gmconst = lua_require("const")
 local gmconf = lua_require("conf")
 local gmvars = lua_require("vars")
 
-local function handleSubmenu(goldmenu, item, player)
+gmitemhandlers[GM_ITEMTYPE_SUBMENU] = function(goldmenu, item, player)
 	local selectTics = goldmenu.bindPressed[GM_MENUBIND_SELECT]
 
 	if type(item.data) ~= "table" then
@@ -16,7 +16,7 @@ local function handleSubmenu(goldmenu, item, player)
 	end
 end
 
-local function handleSlider(goldmenu, item, player)
+gmitemhandlers[GM_ITEMTYPE_SLIDER] = function(goldmenu, item, player)
 	local leftTics = goldmenu.bindPressed[GM_MENUBIND_LEFT]
 	local rightTics = goldmenu.bindPressed[GM_MENUBIND_RIGHT]
 
@@ -66,17 +66,6 @@ local function handleSlider(goldmenu, item, player)
 		end
 	else
 		goldmenu.cvarIncrementDecimal = 0
-	end
-end
-
-local itemHandlerByType = {
-	[GM_ITEMTYPE_SUBMENU] = handleSubmenu,
-	[GM_ITEMTYPE_SLIDER] = handleSlider
-}
-
-function gmitemhandlers.handleItem(goldmenu, item, player)
-	if itemHandlerByType[item.type] then
-		itemHandlerByType[item.type](goldmenu, item, player)
 	end
 end
 

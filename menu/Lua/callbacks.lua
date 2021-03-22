@@ -77,7 +77,9 @@ local function singleMenuThink(i, goldmenu, player)
 		end
 
 		if curItem then
-			gmitemhandlers.handleItem(goldmenu, curItem, player)
+			if gmitemhandlers[curItem.type] then
+				gmitemhandlers[curItem.type](goldmenu, curItem, player)
+			end
 		end
 
 		if backTics == 1 then
