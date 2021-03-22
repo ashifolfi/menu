@@ -30,6 +30,11 @@ function gmcallbacks.menuInit(player)
 	goldmenu.fadeProgress = 0
 	goldmenu.transparency = 0
 
+	-- cvar manipulation vars
+	goldmenu.cvarIncrementAcceleration = FRACUNIT
+	goldmenu.pressedCvarIncrementKey = GM_MENUBIND_NULL
+	goldmenu.cvarIncrementDecimal = 0 -- decimal part of increment..
+
 	goldmenu.pressed = {} -- pressed buttons.
 
 	-- previous button actions. maybe should go into goldmenu.pressed.prev.*?
@@ -141,6 +146,8 @@ local function singleMenuThink(i, goldmenu, player)
 	if goldmenu.open and activeMenu then
 		local upTics = goldmenu.bindPressed[GM_MENUBIND_UP]
 		local downTics = goldmenu.bindPressed[GM_MENUBIND_DOWN]
+		local leftTics = goldmenu.bindPressed[GM_MENUBIND_LEFT]
+		local rightTics = goldmenu.bindPressed[GM_MENUBIND_RIGHT]
 
 		local selectTics = goldmenu.bindPressed[GM_MENUBIND_SELECT]
 		local backTics = goldmenu.bindPressed[GM_MENUBIND_BACK]
@@ -167,9 +174,56 @@ local function singleMenuThink(i, goldmenu, player)
 			end
 		end
 
-		if selectTics == 1 and curItem then
-			if curItem.flags == GM_ITEMFLAG_SUBMENU and type(curItem.data) == "table" then
-				pushMenu(goldmenu, curItem.data)
+		if curItem then
+			if curItem.flags == GM_ITEMFLAG_SLIDER and userdataType(curItem.data) == "consvar_t" then
+				if not goldmenu.bindPressed[goldmenu.pressedCvarIncrementKey] then
+					goldmenu.pressedCvarIncrementKey = GM_MENUBIND_NULL
+					goldmenu.cvarIncrementVelocity = 0
+				end
+
+				goldmenu.pressedCvarIncrementKey = $ or (leftTics and GM_MENUBIND_LEFT) or (rightTics and GM_MENUBIND_RIGHT) or GM_MENUBIND_NULL
+
+				if goldmenu.pressedCvarIncrementKey then
+					local sign = (goldmenu.pressedCvarIncrementKey == GM_MENUBIND_RIGHT and 1) or (goldmenu.pressedCvarIncrementKey == GM_MENUBIND_LEFT and -1) or 0
+					local cvar = curItem.data
+
+					local pressedTics = goldmenu.bindPressed[goldmenu.pressedCvarIncrementKey]
+
+					if pressedTics == 1 then
+						COM_BufInsertText(player, cvar.name .. " " .. cvar.value + sign)
+					end
+
+					-- didnt want to keep track of this, but mathematics itself has forced my hand
+					-- fn(x) = xy^(n+1) + (n+1)xy^n + (n+1)xy^(n-1) + ... (n+1)xy^2 + (n+1)xy + x
+					-- for the function f(x) = x + xy
+					goldmenu.cvarIncrementVelocity = $ or 1
+
+					if goldmenu.cvarIncrementVelocity < INT32_MAX then
+						local prevVel = goldmenu.cvarIncrementVelocity
+						goldmenu.cvarIncrementVelocity = $ + (FixedMul($, gmconf.cvarIncrementAcceleration) or 1)
+
+						if goldmenu.cvarIncrementVelocity < prevVel then
+							goldmenu.cvarIncrementVelocity = INT32_MAX
+						end
+					end
+
+					if goldmenu.cvarIncrementVelocity < 1<<15 then
+						goldmenu.cvarIncrementDecimal = $ + gmconf.cvarBaseIncrement * goldmenu.cvarIncrementVelocity
+						COM_BufInsertText(player, cvar.name .. " " .. cvar.value + sign * FixedInt(goldmenu.cvarIncrementDecimal))
+						goldmenu.cvarIncrementDecimal = $ & ~0xFFFF0000 -- decimal only
+					else
+						local inc = sign * FixedMul(goldmenu.cvarIncrementVelocity, gmconf.cvarBaseIncrement)
+						goldmenu.cvarIncrementDecimal = 0
+						COM_BufInsertText(player, cvar.name .. " " .. cvar.value + inc)
+					end
+				else
+					goldmenu.cvarIncrementDecimal = 0
+				end
+
+			elseif curItem.flags == GM_ITEMFLAG_SUBMENU and type(curItem.data) == "table" then
+				if selectTics == 1 then
+					pushMenu(goldmenu, curItem.data)
+				end
 			end
 		end
 

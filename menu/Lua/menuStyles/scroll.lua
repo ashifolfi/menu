@@ -23,7 +23,7 @@ config.fontAligned = (#config.font and config.font ~= "normal") and (config.font
 config.font = #$ and $ or "normal"
 
 local menuItemHeights = {
-	[GM_ITEMFLAG_SCROLL] = 2
+	[GM_ITEMFLAG_SLIDER] = 2
 }
 
 local function getScrollFactor(menu, index)
@@ -106,6 +106,16 @@ function scroll.update(menudata, menu, gmconf)
 	menudata.transparency = gmutil.fixedLerp(0, 10, FRACUNIT - menudata.fadeProgress) << FF_TRANSSHIFT
 	menudata.transHalf = gmutil.fixedLerp(5, 10, FRACUNIT - menudata.fadeProgress) << FF_TRANSSHIFT
 
+	menudata.cvarBounds = $ or {}
+
+	for i, item in ipairs(menu.items) do
+		menudata.cvarBounds[i] = $ or {}
+
+		if item.flags == GM_ITEMFLAG_SLIDER then
+			menudata.cvarBounds[i].min, menudata.cvarBounds[i].max = gmutil.getCvarBounds(item.data)
+		end
+	end
+
 	if not menudata.fadeProgress then
 		return false -- pop menu!
 	end
@@ -116,11 +126,11 @@ local function drawMenuTitle(v, config, menu, gmconf, strFlags)
 end
 
 local menuItemDrawers = {
-	[GM_ITEMFLAG_NONE] = function(v, y, line, localStrFlags)
+	[GM_ITEMFLAG_NONE] = function(v, y, line, menudata, item, i, localStrFlags)
 		v.drawString(160, y, line, localStrFlags, config.fontAligned)
 	end,
 
-	[GM_ITEMFLAG_SCROLL] = function(v, y, line, localStrFlags, transparency)
+	[GM_ITEMFLAG_SLIDER] = function(v, y, line, menudata, item, i, localStrFlags, transparency)
 		v.drawString(160, y - config.lineSize / 2, line, localStrFlags, config.fontAligned)
 		//v.drawString(160, y + config.lineSize / 2, line, localStrFlags, config.fontAligned)
 
@@ -134,16 +144,27 @@ local menuItemDrawers = {
 
 		v.draw(160 - (halfMidPieces) * mid.width - left.width - 2, newY, left, transparency)
 
-		for i = -halfMidPieces + 1, halfMidPieces do
-			v.draw(160 - i * mid.width, newY, mid, transparency)
+		for ii = -halfMidPieces + 1, halfMidPieces do
+			v.draw(160 - ii * mid.width, newY, mid, transparency)
 		end
 
 		v.draw(160 + (halfMidPieces - 1) * mid.width + right.width + 2, newY, right, transparency)
 
-		local angle = FixedAngle(2 * leveltime * FRACUNIT)
-
 		local slider = v.cachePatch("M_SLIDEC")
-		v.draw(160 + FixedMul(halfMidPieces * mid.width, cos(angle)) - slider.width/2, newY, slider, transparency)
+		local sliderBoundsMath = (halfMidPieces * mid.width) + slider.width
+
+		local cvar_min, cvar_max = menudata.cvarBounds[i].min, menudata.cvarBounds[i].max
+
+		local sliderPercentage = 0
+
+		if cvar_max - cvar_min then
+			sliderPercentage = FixedDiv(item.data.value - cvar_min, cvar_max - cvar_min)
+		end
+
+		local sliderPos = gmutil.fixedLerp(160 - sliderBoundsMath, 160 + sliderBoundsMath, sliderPercentage)
+
+		v.draw(sliderPos - slider.width/2, newY, slider, transparency)
+		v.drawString(160, newY, item.data.value, localStrFlags, config.fontAligned)
 	end
 }
 
@@ -236,7 +257,7 @@ function scroll.drawer(v, menudata, menu, gmconf)
 			localStrFlags = ($ & ~V_CHARCOLORMASK) | gmconf.selectionColor
 		end
 
-		drawMenuItem(item.flags, v, realY, line, localStrFlags, transparency)
+		drawMenuItem(item.flags, v, realY, line, menudata, item, i, localStrFlags, transparency)
 	end
 
 	drawMenuTitle(v, config, menu, gmconf, strFlags, transparency)

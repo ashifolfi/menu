@@ -6,6 +6,8 @@ local gmconst = lua_require("const")
 
 gmconf.holdWait = TICRATE/4
 gmconf.ticsBetweenHoldAdvance = 3 -- tics between moving to next selection
+gmconf.cvarIncrementAcceleration = FRACUNIT/8
+gmconf.cvarBaseIncrement = FRACUNIT/32
 
 gmconf.maxFadeStrength = 12
 
@@ -18,6 +20,8 @@ gmconf.defaultBinds = {
 	[GM_MENUBIND_OPEN] = GM_CONTROL_TOSSFLAG,
 	[GM_MENUBIND_UP] = GM_CONTROL_CAMERAUP,
 	[GM_MENUBIND_DOWN] = GM_CONTROL_CAMERADOWN,
+	[GM_MENUBIND_LEFT] = GM_CONTROL_CAMERALEFT,
+	[GM_MENUBIND_RIGHT] = GM_CONTROL_CAMERARIGHT,
 	[GM_MENUBIND_SELECT] = GM_CONTROL_JUMP,
 	[GM_MENUBIND_BACK] = GM_CONTROL_SPIN,
 }

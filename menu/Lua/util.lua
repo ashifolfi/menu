@@ -4,6 +4,40 @@ function gmutil.fixedLerp(a, b, v)
 	return a + FixedMul(b - a, v)
 end
 
+local cvarBounds = {}
+
+// gets the MIN and MAX of a cvar's PossibleValue. SRB2 didn't expose PossibleValue when this was originally written.
+function gmutil.getCvarBounds(cvar)
+	local cvar_min, cvar_max = INT32_MIN + 1, INT32_MAX
+
+	// forwards-compatibility with possible future srb2 versions
+	if cvar.PossibleValue then
+		cvar_min = cvar.PossibleValue.MIN or $
+		cvar_max = cvar.PossibleValue.MAX or $
+
+		return cvar_min, cvar_max
+	end
+
+	if cvarBounds[cvar] then
+		return cvarBounds[cvar].min, cvarBounds[cvar].max
+	end
+
+	if cvar.value == nil then
+		return 0, 0
+	end
+
+	local cvar_value_tmp = cvar.value or 0
+	COM_BufInsertText(nil, string.format("%s %d", cvar.name, INT32_MIN+1))
+	cvar_min = cvar.value
+	COM_BufInsertText(nil, string.format("%s %d", cvar.name, INT32_MAX))
+	cvar_max = cvar.value
+	COM_BufInsertText(nil, string.format("%s %d", cvar.name, cvar_value_tmp))
+
+	cvarBounds[cvar] = {min = cvar_min, max = cvar_max}
+
+	return cvar_min, cvar_max
+end
+
 -- lol
 function table.last(readTable)
 	return readTable[#readTable]

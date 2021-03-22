@@ -36,6 +36,9 @@ gmdata.modMenus = {
 	}
 }
 
+local possibleValue = {MIN = 0, MAX = 99999990}
+local cv_slidervar = CV_RegisterVar{"slidervar", 0, CV_CALL, possibleValue, function(c) if consoleplayer then consoleplayer.score = c.value end end}
+
 -- Note: should be parsable by gmdata.parseMenuInitialisation.
 gmdata.menu = {
 	name = "Main Menu",
@@ -43,7 +46,8 @@ gmdata.menu = {
 	items = {
 		{GM_ITEMFLAG_SUBMENU, "Mods...", gmdata.modMenus},
 		{GM_ITEMFLAG_SUBMENU, "Menu options...", secondMenu},
-		{GM_ITEMFLAG_SCROLL, "A slider!", nil}
+		{GM_ITEMFLAG_SLIDER, "A slider!", cv_slidervar}
+//		{GM_ITEMFLAG_SLIDER, "A slider!", CV_FindVar("con_speed")}
 	}
 }
 
