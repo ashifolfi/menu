@@ -18,6 +18,18 @@ function gmutil.getCvarBounds(cvar)
 		return cvar_min, cvar_max
 	end
 
+	local commandFormat
+
+	if cvar.flags & CV_FLOAT then
+		commandFormat = "%s %f"
+
+		-- CV_FLOAT cvars are picky about bounds
+		cvar_min = -32767 * FRACUNIT
+		cvar_max = 32767 * FRACUNIT
+	else
+		commandFormat = "%s %d"
+	end
+
 	if cvarBounds[cvar] then
 		return cvarBounds[cvar].min, cvarBounds[cvar].max
 	end
@@ -27,11 +39,11 @@ function gmutil.getCvarBounds(cvar)
 	end
 
 	local cvar_value_tmp = cvar.value or 0
-	COM_BufInsertText(nil, string.format("%s %d", cvar.name, INT32_MIN+1))
+	COM_BufInsertText(nil, string.format(commandFormat, cvar.name, cvar_min))
 	cvar_min = cvar.value
-	COM_BufInsertText(nil, string.format("%s %d", cvar.name, INT32_MAX))
+	COM_BufInsertText(nil, string.format(commandFormat, cvar.name, cvar_max))
 	cvar_max = cvar.value
-	COM_BufInsertText(nil, string.format("%s %d", cvar.name, cvar_value_tmp))
+	COM_BufInsertText(nil, string.format(commandFormat, cvar.name, cvar_value_tmp))
 
 	cvarBounds[cvar] = {min = cvar_min, max = cvar_max}
 

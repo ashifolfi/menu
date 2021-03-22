@@ -154,17 +154,26 @@ local menuItemDrawers = {
 		local sliderBoundsMath = (halfMidPieces * mid.width) + slider.width
 
 		local cvar_min, cvar_max = menudata.cvarBounds[i].min, menudata.cvarBounds[i].max
+		local cvar = item.data
 
 		local sliderPercentage = 0
 
 		if cvar_max - cvar_min then
-			sliderPercentage = FixedDiv(item.data.value - cvar_min, cvar_max - cvar_min)
+			sliderPercentage = FixedDiv(cvar.value - cvar_min, cvar_max - cvar_min)
 		end
 
 		local sliderPos = gmutil.fixedLerp(160 - sliderBoundsMath, 160 + sliderBoundsMath, sliderPercentage)
 
+		local value = cvar.value
+
+		if cvar.flags & CV_FLOAT then
+			value = string.format("%.2f", $)
+		else
+			value = tostring($)
+		end
+
 		v.draw(sliderPos - slider.width/2, newY, slider, transparency)
-		v.drawString(160, newY, item.data.value, localStrFlags, config.fontAligned)
+		v.drawString(160, newY, value, localStrFlags, config.fontAligned)
 	end
 }
 

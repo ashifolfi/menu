@@ -6,8 +6,9 @@ local gmconst = lua_require("const")
 
 gmconf.holdWait = TICRATE/4
 gmconf.ticsBetweenHoldAdvance = 3 -- tics between moving to next selection
-gmconf.cvarIncrementAcceleration = FRACUNIT/8
+gmconf.cvarIncrementAcceleration = FRACUNIT/12
 gmconf.cvarBaseIncrement = FRACUNIT/32
+gmconf.cvarFloatBaseIncrement = FRACUNIT/100
 
 gmconf.maxFadeStrength = 12
 

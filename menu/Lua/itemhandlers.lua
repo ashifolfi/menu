@@ -37,8 +37,16 @@ gmitemhandlers[GM_ITEMTYPE_SLIDER] = function(goldmenu, item, player)
 
 		local pressedTics = goldmenu.bindPressed[goldmenu.pressedCvarIncrementKey]
 
+		local incrementMul = 1
+		local commandFormat = "%s %d"
+
+		if cvar.flags & CV_FLOAT then
+			incrementMul = gmconf.cvarFloatBaseIncrement
+			commandFormat = "%s %.2f"
+		end
+
 		if pressedTics == 1 then
-			COM_BufInsertText(player, cvar.name .. " " .. cvar.value + sign)
+			COM_BufInsertText(player, string.format(commandFormat, cvar.name, cvar.value + (incrementMul * sign)))
 		end
 
 		-- didnt want to keep track of this, but mathematics itself has forced my hand
@@ -57,12 +65,13 @@ gmitemhandlers[GM_ITEMTYPE_SLIDER] = function(goldmenu, item, player)
 
 		if goldmenu.cvarIncrementVelocity < 1<<15 then
 			goldmenu.cvarIncrementDecimal = $ + gmconf.cvarBaseIncrement * goldmenu.cvarIncrementVelocity
-			COM_BufInsertText(player, cvar.name .. " " .. cvar.value + sign * FixedInt(goldmenu.cvarIncrementDecimal))
+
+			COM_BufInsertText(player, string.format(commandFormat, cvar.name, cvar.value + incrementMul * (sign * FixedInt(goldmenu.cvarIncrementDecimal))))
 			goldmenu.cvarIncrementDecimal = $ & ~0xFFFF0000 -- decimal only
 		else
 			local inc = sign * FixedMul(goldmenu.cvarIncrementVelocity, gmconf.cvarBaseIncrement)
 			goldmenu.cvarIncrementDecimal = 0
-			COM_BufInsertText(player, cvar.name .. " " .. cvar.value + inc)
+			COM_BufInsertText(player, string.format(commandFormat, cvar.name, cvar.value + (incrementMul * inc)))
 		end
 	else
 		goldmenu.cvarIncrementDecimal = 0
