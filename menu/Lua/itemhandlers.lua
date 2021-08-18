@@ -3,6 +3,7 @@ local gmitemhandlers = {}
 local gmconst = lua_require("const")
 local gmconf = lua_require("conf")
 local gmvars = lua_require("vars")
+local gmutil = lua_require("util")
 
 gmitemhandlers[GM_ITEMTYPE_SUBMENU] = function(goldmenu, item, player)
 	local selectTics = goldmenu.bindPressed[GM_MENUBIND_SELECT]
@@ -40,13 +41,15 @@ gmitemhandlers[GM_ITEMTYPE_SLIDER] = function(goldmenu, item, player)
 		local incrementMul = 1
 		local commandFormat = "%s %d"
 
+		local newvalue = cvar.value
+
 		if cvar.flags & CV_FLOAT then
 			incrementMul = gmconf.cvarFloatBaseIncrement
 			commandFormat = "%s %.2f"
 		end
 
 		if pressedTics == 1 then
-			COM_BufInsertText(player, string.format(commandFormat, cvar.name, cvar.value + (incrementMul * sign)))
+			newvalue = $ + (incrementMul * sign)
 		end
 
 		-- didnt want to keep track of this, but mathematics itself has forced my hand
@@ -66,12 +69,18 @@ gmitemhandlers[GM_ITEMTYPE_SLIDER] = function(goldmenu, item, player)
 		if goldmenu.cvarIncrementVelocity < 1<<15 then
 			goldmenu.cvarIncrementDecimal = $ + gmconf.cvarBaseIncrement * goldmenu.cvarIncrementVelocity
 
-			COM_BufInsertText(player, string.format(commandFormat, cvar.name, cvar.value + incrementMul * (sign * FixedInt(goldmenu.cvarIncrementDecimal))))
+			newvalue = $ + incrementMul * (sign * FixedInt(goldmenu.cvarIncrementDecimal))
+
 			goldmenu.cvarIncrementDecimal = $ & ~0xFFFF0000 -- decimal only
 		else
 			local inc = sign * FixedMul(goldmenu.cvarIncrementVelocity, gmconf.cvarBaseIncrement)
 			goldmenu.cvarIncrementDecimal = 0
-			COM_BufInsertText(player, string.format(commandFormat, cvar.name, cvar.value + (incrementMul * inc)))
+
+			newvalue = $ + (incrementMul * inc)
+		end
+
+		if cvar.value ~= newvalue then
+			gmutil.setCvarValue(player, cvar, newvalue)
 		end
 	else
 		goldmenu.cvarIncrementDecimal = 0

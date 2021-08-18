@@ -50,6 +50,16 @@ function gmutil.getCvarBounds(cvar)
 	return cvar_min, cvar_max
 end
 
+function gmutil.setCvarValue(player, cvar, value)
+	local commandFormat = "%s %d"
+
+	if cvar.flags & CV_FLOAT then
+		commandFormat = "%s %.2f"
+	end
+
+	COM_BufInsertText(player, string.format(commandFormat, cvar.name, value))
+end
+
 -- lol
 function table.last(readTable)
 	return readTable[#readTable]
