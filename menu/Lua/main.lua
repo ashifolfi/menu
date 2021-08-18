@@ -1,12 +1,13 @@
 --[[
-	Hello Lua scripters, this is Golden here, telling you stuff about how I did this.
+	Hello Lua scripters, I bet you're wondering what's up with this ultra weird setup.
+	This setup is a method in which I distribute data between files without requiring many _G rawsets.
+
+	Are you looking for the API? If so, check ./api.lua. The global variable is `gmapi`.
+
 	`init.lua` directly loads this file, and defines `lua_require': a `require` clone for SRB2.
 	Any file `lua_require`'d will be cached for future retrieval; loading them here is not a waste.
 
 	Make sure to not 'lua_require' files that are requiring your file!
-
-	Most of the variables aren't global; the only exception being `gmapi`: your API!
-	Files are structured in such a way where `rawset`ting to _G is never really needed to distribute data.
 
 	Everything below the `lua_require`s is just initialisation code.
 	Have fun looking through the code!
