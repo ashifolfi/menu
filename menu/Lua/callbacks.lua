@@ -167,8 +167,10 @@ function gmcallbacks.drawMenu(v, player)
 		lowestMenuToDraw = $ - 1
 	end
 
+	-- Fades in the menu
 	v.fadeScreen(0xFA00, goldmenu.fadeStrength)
 
+	-- Draw the lowest level first
 	for i = lowestMenuToDraw, #goldmenu.menus do
 		local menudata = goldmenu.menudata[i]
 		local menu = goldmenu.menus[i]

@@ -33,13 +33,14 @@ fi
 if [[ ! $PK3_RELEASE ]]; then
 	PK3_TIME=$(date +"%m.%d.%y-%T")
 
-	PK3_METADATA="$PK3_COMMIT"_"$PK3_TIME"
-	PK3_FULLNAME="$PK3_FULLNAME"+"$PK3_METADATA"
+
+	PK3_FULLNAME="$PK3_FULLNAME"
 fi
 
 PK3_FILES=${PK3_FILES:-$(cat <<-END
 	init.lua
 	README.txt
+	Graphics/*
 	Lua/*
 END
 )}

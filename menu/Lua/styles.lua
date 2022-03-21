@@ -16,5 +16,6 @@ end
 
 gmstyles.scroll = initialiseStyle("scroll")
 gmstyles.static = initialiseStyle("static")
+gmstyles.indevscroll = initialiseStyle("mainmenu")
 
 return gmstyles

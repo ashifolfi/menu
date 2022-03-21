@@ -18,13 +18,10 @@ local secondMenu = {
 	}
 }
 
-local thirdMenu = {
+gmdata.thirdMenu = {
 	name = "Another Submenu!",
 	style = gmstyles.scroll,
-	items = {
-		"This one scrolls!",
-		"Isn't that neat?",
-	}
+	items = {}
 }
 
 gmdata.modMenus = {
@@ -44,13 +41,15 @@ local cv_slidervar = CV_RegisterVar{"slidervar", 0, CV_FLOAT, possibleValue}
 
 -- Note: should be parsable by gmdata.parseMenuInitialisation.
 gmdata.menu = {
-	name = "Main Menu",
-	style = gmstyles.scroll,
+	name = "",
+	style = gmstyles.indevscroll,
 	items = {
-		{GM_ITEMTYPE_SUBMENU, 0, "Mods...", gmdata.modMenus},
-		{GM_ITEMTYPE_SUBMENU, 0, "Menu options...", secondMenu},
-		{GM_ITEMTYPE_SLIDER, 0, "A slider!", cv_slidervar}
-//		{GM_ITEMTYPE_SLIDER, 0, "A slider!", CV_FindVar("con_speed")}
+		{GM_ITEMTYPE_SUBMENU, 0, "Single Player", gmdata.modMenus},
+		{GM_ITEMTYPE_SUBMENU, 0, "Multiplayer", gmdata.modMenus},
+		{GM_ITEMTYPE_SUBMENU, 0, "Extras", gmdata.modMenus},
+		{GM_ITEMTYPE_SUBMENU, 0, "Addons", gmdata.modMenus},
+		{GM_ITEMTYPE_SUBMENU, 0, "Options", gmdata.modMenus},
+		{GM_ITEMTYPE_SUBMENU, 0, "Quit Game", gmdata.modMenus}
 	}
 }
 
