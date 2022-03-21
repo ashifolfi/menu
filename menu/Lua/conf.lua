@@ -17,31 +17,22 @@ gmconf.fadeSpeed = FRACUNIT / gmconf.fadeTics
 
 gmconf.selectionColor = V_YELLOWMAP
 
+-- Default binds utilize GC_ constants to ensure everything works
+-- no matter the control method.
+-- Any binds made from there on out use standard keycodes translated
+-- into readable key/button names
 gmconf.defaultBinds = {
-	[GM_MENUBIND_OPEN] = GM_CONTROL_TOSSFLAG,
-	[GM_MENUBIND_UP] = GM_CONTROL_CAMERAUP,
-	[GM_MENUBIND_DOWN] = GM_CONTROL_CAMERADOWN,
-	[GM_MENUBIND_LEFT] = GM_CONTROL_CAMERALEFT,
-	[GM_MENUBIND_RIGHT] = GM_CONTROL_CAMERARIGHT,
-	[GM_MENUBIND_SELECT] = GM_CONTROL_JUMP,
-	[GM_MENUBIND_BACK] = GM_CONTROL_SPIN,
+	[GM_MENUBIND_OPEN] = GM_MENUCTRL_OPEN,
+	[GM_MENUBIND_SELECT] = GM_MENUCTRL_SELECT,
+	[GM_MENUBIND_BACK] = GM_MENUCTRL_BACK,
+	[GM_MENUBIND_MOVE.UP] = GM_MENUCTRL_MOVE.UP,
+	[GM_MENUBIND_MOVE.DOWN] = GM_MENUCTRL_MOVE.DOWN,
+	[GM_MENUBIND_MOVE.LEFT] = GM_MENUCTRL_MOVE.LEFT,
+	[GM_MENUBIND_MOVE.RIGHT] = GM_MENUCTRL_MOVE.RIGHT,
 }
 
 -- External configuration (you!)
 
 local goldmenu_controls_pv = {MIN = 0, MAX = GM_CONTROL_MAXATTAINABLE} -- define controls range
-
--- define control names
-for controlCode, controlName in ipairs(gmconst.controlToString) do
-	goldmenu_controls_pv[controlName] = controlCode
-end
-
-gmconf.bindCvar = {}
-
-for i, v in ipairs(gmconf.defaultBinds) do
-	local str = gmconst.menuBindToString[i]
-
-	gmconf.bindCvar[i] = CV_RegisterVar{"_goldmenu_control_" .. str, gmconst.controlToString[v], 0, menucontrols_pv, nil}
-end
 
 return gmconf

@@ -1,3 +1,9 @@
+/*
+	Rewritten to utilize the new lua inputs.
+	
+	- Ashi
+*/
+
 local gmcontrols = {}
 
 local gmconst = lua_require("const")
@@ -22,51 +28,108 @@ function gmcontrols.runConditionalTimer(timer, condition)
 	return timer
 end
 
--- Gathers all the menu controls
-function gmcontrols.getMenuControls(player)
-	-- Pressed controls
-	if not player.goldmenu.pressed then
-		-- [GM_CONTROL_*] = tics pressed
-		player.goldmenu.pressed = {}
+gmcontrols.plr = {}
+
+-- We use this to constantly check in on what we're pressing or not
+-- KeyDown doesn't run every frame but we can keep an eye on what's being
+-- pressed via a special table
+-- Said table isn't exactly elegant but it doesn't need to be.
+function gmcontrols.checkControls()
+	if gmcontrols.plr.ctrl_pressed == nil then
+		gmcontrols.plr.ctrl_pressed = {}
 	end
-
-	local cmd = player.cmd
-
-	-- gather movement controls
-	player.goldmenu.pressed[GM_CONTROL_MOVEUP] = gmcontrols.runConditionalTimer($, cmd.forwardmove > 0)
-	player.goldmenu.pressed[GM_CONTROL_MOVEDOWN] = gmcontrols.runConditionalTimer($, cmd.forwardmove < 0)
-
-	player.goldmenu.pressed[GM_CONTROL_MOVELEFT] = gmcontrols.runConditionalTimer($, -cmd.sidemove > 0)
-	player.goldmenu.pressed[GM_CONTROL_MOVERIGHT] = gmcontrols.runConditionalTimer($, -cmd.sidemove < 0)
-
-	-- gather camera controls
-	local aimdiff = cmd.aiming - player.goldmenu.prevaiming
-	local turndiff = (cmd.angleturn - player.goldmenu.prevangleturn) & ~1
-
-	player.goldmenu.pressed[GM_CONTROL_CAMERAUP] = gmcontrols.runConditionalTimer($, aimdiff > 0)
-	player.goldmenu.pressed[GM_CONTROL_CAMERADOWN] = gmcontrols.runConditionalTimer($, aimdiff < 0)
-
-	player.goldmenu.pressed[GM_CONTROL_CAMERALEFT] = gmcontrols.runConditionalTimer($, turndiff > 0)
-	player.goldmenu.pressed[GM_CONTROL_CAMERARIGHT] = gmcontrols.runConditionalTimer($, turndiff < 0)
-
-	-- gather weapon number controls
-	local weaponNum = cmd.buttons & BT_WEAPONMASK
-
-	for i = 1, BT_WEAPONMASK do
-		player.goldmenu.pressed[GM_CONTROL_WEAPON1 + i - 1] = gmcontrols.runConditionalTimer($, i == weaponNum)
-	end
-
-	-- go through the rest of the buttons as a truth table
-	for i = (BT_WEAPONMASK + 1)>>2, 15 do
-		local button = cmd.buttons & (1 << i)
-		local newcontrol = gmconst.playerButtonToControl[1 << i]
-
-		if newcontrol ~= nil then
-			player.goldmenu.pressed[newcontrol] = gmcontrols.runConditionalTimer($, button > 0)
+	
+	local player = gmcontrols.plr
+	local inputs = gmcontrols.plr.ctrl_pressed
+	
+	if inputs.move == nil then
+		inputs.move = {}
+		for k, u in pairs(GM_MENUCTRL_MOVE) do
+			inputs.move[k] = false
 		end
 	end
-
-	-- player.goldmenu.prev* set by caller.
+	
+	-- Adapted from getMenuControls
+	-- gather movement controls
+	for k, u in pairs(GM_MENUCTRL_MOVE) do
+		player.goldmenu.pressed[GM_MENUCTRL_MOVE[k]] = gmcontrols.runConditionalTimer($, inputs.move[k])
+	end
+	
+	player.goldmenu.pressed[GM_MENUCTRL_SELECT] = gmcontrols.runConditionalTimer($, inputs[GM_MENUCTRL_SELECT])
+	player.goldmenu.pressed[GM_MENUCTRL_BACK] = gmcontrols.runConditionalTimer($, inputs[GM_MENUCTRL_BACK])
+	player.goldmenu.pressed[GM_MENUCTRL_OPEN] = gmcontrols.runConditionalTimer($, inputs[GM_MENUCTRL_OPEN])
+	
 end
+
+-- New Super Control Handler U Deluxe (Now with funky mode)
+addHook("KeyDown", function(key)
+	local inputs = gmcontrols.plr.ctrl_pressed 	-- shortcuts
+	
+	-- Put this here because it's the open key
+	for i=1,2 do -- Less lines of code overall
+		if key.num == GM_MENUCTRL_OPEN[i] then
+			inputs[GM_MENUCTRL_OPEN] = true; return true
+		end
+		
+		if not(gmcontrols.plr.goldmenu.open) then return end
+		
+		for k, u in pairs(GM_MENUCTRL_MOVE) do
+			if key.num == GM_MENUCTRL_MOVE[k][i] then
+				inputs.move[k] = true; return true
+			end
+		end
+		
+		if key.num == GM_MENUCTRL_SELECT[i] then
+			inputs[GM_MENUCTRL_SELECT] = true; return true
+		end
+		
+		if key.num == GM_MENUCTRL_BACK[i] then
+			inputs[GM_MENUCTRL_BACK] = true; return true
+		end
+		
+		if key.num == GM_CONTROL_CONSOLE[i] then
+		-- The only control we should NEVER block is console
+		-- unless we're in a record attack mode, then :shitsfree:
+			return false
+		end
+		-- block everything else
+		return true
+	end
+end)
+
+addHook("KeyUp", function(key)
+	local inputs = gmcontrols.plr.ctrl_pressed 	-- shortcuts
+	
+	-- Put this here because it's the open key
+	for i=1,2 do -- Less lines of code overall
+		if key.num == GM_MENUCTRL_OPEN[i] then
+			inputs[GM_MENUCTRL_OPEN] = false; return true
+		end
+		
+		if not(gmcontrols.plr.goldmenu.open) then return end
+		
+		for k, u in pairs(GM_MENUCTRL_MOVE) do
+			if key.num == GM_MENUCTRL_MOVE[k][i] then
+				inputs.move[k] = false; return true
+			end
+		end
+		
+		if key.num == GM_MENUCTRL_SELECT[i] then
+			inputs[GM_MENUCTRL_SELECT] = false; return true
+		end
+		
+		if key.num == GM_MENUCTRL_BACK[i] then
+			inputs[GM_MENUCTRL_BACK] = false; return true
+		end
+		
+		if key.num == GM_CONTROL_CONSOLE[i] then
+		-- The only control we should NEVER block is console
+		-- unless we're in a record attack mode, then :shitsfree:
+			return false
+		end
+		-- block everything else
+		return true
+	end
+end)
 
 return gmcontrols

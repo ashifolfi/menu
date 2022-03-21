@@ -1,62 +1,35 @@
 -- GoldMenu constants.
 
+-- New Control Constants
+-- Allow for the use of for statements in
+-- the control handler
 local const = {
-
-	// Selectable controls
-
 	GM_CONTROL_NULL = 0,
-
-	GM_CONTROL_MOVEUP = 1,
-	GM_CONTROL_MOVEDOWN = 2,
-	GM_CONTROL_MOVELEFT = 3,
-	GM_CONTROL_MOVERIGHT = 4,
-	GM_CONTROL_CAMERAUP = 5,
-	GM_CONTROL_CAMERADOWN = 6,
-	GM_CONTROL_CAMERALEFT = 7,
-	GM_CONTROL_CAMERARIGHT = 8,
-
-	GM_CONTROL_JUMP = 9,
-	GM_CONTROL_SPIN = 10,
-	GM_CONTROL_FIREPRIMARY = 11,
-	GM_CONTROL_FIRESECONDARY = 12,
-	GM_CONTROL_TOSSFLAG = 13,
-	GM_CONTROL_CUSTOM1 = 14,
-	GM_CONTROL_CUSTOM2 = 15,
-	GM_CONTROL_CUSTOM3 = 16,
-
-	GM_CONTROL_WEAPONPREV = 17,
-	GM_CONTROL_WEAPONNEXT = 18,
-
-	GM_CONTROL_WEAPON1 = 19,
-	GM_CONTROL_WEAPON2 = 20,
-	GM_CONTROL_WEAPON3 = 21,
-	GM_CONTROL_WEAPON4 = 22,
-	GM_CONTROL_WEAPON5 = 23,
-	GM_CONTROL_WEAPON6 = 24,
-	GM_CONTROL_WEAPON7 = 25,
-	GM_CONTROL_WEAPON8 = 26,
-	GM_CONTROL_WEAPON9 = 27,
-	GM_CONTROL_WEAPON10 = 28,
-	GM_CONTROL_WEAPON11 = 29,
-	GM_CONTROL_WEAPON12 = 30,
-	GM_CONTROL_WEAPON13 = 31,
-	GM_CONTROL_WEAPON14 = 32,
-	GM_CONTROL_WEAPON15 = 33,
-	GM_CONTROL_WEAPON16 = 34,
+	
+	-- System Keys
+	GM_CONTROL_CONSOLE = {},
+	GM_CONTROL_SYSMENU = {},
+	GM_CONTROL_PAUSE = {},
 
 	GM_CONTROL_MAX = 35,
-
+	
 	// Menu binds
 
 	GM_MENUBIND_NULL = 0,
 
+	GM_MENUCTRL_OPEN = {0,0},
+	GM_MENUCTRL_SELECT = {0,0},
+	GM_MENUCTRL_BACK = {0,0},
+	GM_MENUCTRL_MOVE = {
+		UP = {0,0}, DOWN = {0,0}, LEFT = {0,0}, RIGHT = {0,0},
+	},
+	
 	GM_MENUBIND_OPEN = 1,
-	GM_MENUBIND_UP = 2,
-	GM_MENUBIND_DOWN = 3,
-	GM_MENUBIND_LEFT = 4,
-	GM_MENUBIND_RIGHT = 5,
-	GM_MENUBIND_SELECT = 6,
-	GM_MENUBIND_BACK = 7,
+	GM_MENUBIND_SELECT = 2,
+	GM_MENUBIND_BACK = 3,
+	GM_MENUBIND_MOVE = {
+		UP = 4, DOWN = 5, LEFT = 6, RIGHT = 7,
+	},
 
 	GM_MENUBIND_MAX = 8,
 
@@ -67,85 +40,34 @@ local const = {
 	GM_ITEMTYPE_SLIDER = 2,
 }
 
-const.GM_CONTROL_MAXATTAINABLE = const.GM_CONTROL_WEAPON1 + 7 - 1
-
 for k, v in pairs(const) do
 	rawset(_G, k, v)
 end
 
 local gmconst = {}
 
--- Converts a menu control to a string..
-gmconst.controlToString = {
-	[GM_CONTROL_NULL] = "None",
-
-	[GM_CONTROL_MOVEUP] = "Move Forward",
-	[GM_CONTROL_MOVEDOWN] = "Move Backward",
-	[GM_CONTROL_MOVELEFT] = "Move Left",
-	[GM_CONTROL_MOVERIGHT] = "Move Right",
-
-	[GM_CONTROL_CAMERAUP] = "Look Up",
-	[GM_CONTROL_CAMERADOWN] = "Look Down",
-	[GM_CONTROL_CAMERALEFT] = "Look Left",
-	[GM_CONTROL_CAMERARIGHT] = "Look Right",
-
-	[GM_CONTROL_JUMP] = "Jump",
-	[GM_CONTROL_SPIN] = "Spin",
-
-	[GM_CONTROL_FIREPRIMARY] = "Fire",
-	[GM_CONTROL_FIRESECONDARY] = "Fire Normal",
-	[GM_CONTROL_TOSSFLAG] = "Toss Flag",
-	[GM_CONTROL_CUSTOM1] = "Custom Action 1",
-	[GM_CONTROL_CUSTOM2] = "Custom Action 2",
-	[GM_CONTROL_CUSTOM3] = "Custom Action 3",
-
-	[GM_CONTROL_WEAPONPREV] = "Prev Weapon",
-	[GM_CONTROL_WEAPONNEXT] = "Next Weapon",
-
-	[GM_CONTROL_WEAPON1] = "Weapon 1",
-	[GM_CONTROL_WEAPON2] = "Weapon 2",
-	[GM_CONTROL_WEAPON3] = "Weapon 3",
-	[GM_CONTROL_WEAPON4] = "Weapon 4",
-	[GM_CONTROL_WEAPON5] = "Weapon 5",
-	[GM_CONTROL_WEAPON6] = "Weapon 6",
-	[GM_CONTROL_WEAPON7] = "Weapon 7",
-
-	[GM_CONTROL_WEAPON8] = "Weapon 8",
-	[GM_CONTROL_WEAPON9] = "Weapon 9",
-	[GM_CONTROL_WEAPON10] = "Weapon 10",
-	[GM_CONTROL_WEAPON11] = "Weapon 11",
-	[GM_CONTROL_WEAPON12] = "Weapon 12",
-	[GM_CONTROL_WEAPON13] = "Weapon 13",
-	[GM_CONTROL_WEAPON14] = "Weapon 14",
-
-	[GM_CONTROL_WEAPON15] = "Weapon 15",
-	[GM_CONTROL_WEAPON16] = "Weapon 16"
-}
+-- Refresh our system keys.
+function gmconst.refreshSysCtrl()
+	GM_CONTROL_PAUSE[1],GM_CONTROL_PAUSE[2] = input.gameControlToKeyNum(GC_PAUSE)
+	GM_CONTROL_SYSMENU[1],GM_CONTROL_SYSMENU[2] = input.gameControlToKeyNum(GC_SYSTEMMENU)
+	GM_CONTROL_CONSOLE[1],GM_CONTROL_CONSOLE[2] = input.gameControlToKeyNum(GC_CONSOLE)
+	GM_MENUCTRL_OPEN[1],GM_MENUCTRL_OPEN[2] = input.gameControlToKeyNum(GC_TOSSFLAG)
+	GM_MENUCTRL_SELECT[1],GM_MENUCTRL_SELECT[2] = input.gameControlToKeyNum(GC_JUMP)
+	GM_MENUCTRL_BACK[1],GM_MENUCTRL_BACK[2] = input.gameControlToKeyNum(GC_SPIN)
+	GM_MENUCTRL_MOVE.UP[1],GM_MENUCTRL_MOVE.UP[2] = input.gameControlToKeyNum(GC_FORWARD)
+	GM_MENUCTRL_MOVE.DOWN[1],GM_MENUCTRL_MOVE.DOWN[2] = input.gameControlToKeyNum(GC_BACKWARD)
+	GM_MENUCTRL_MOVE.LEFT[1],GM_MENUCTRL_MOVE.LEFT[2] = input.gameControlToKeyNum(GC_STRAFELEFT)
+	GM_MENUCTRL_MOVE.RIGHT[1],GM_MENUCTRL_MOVE.RIGHT[2] = input.gameControlToKeyNum(GC_STRAFERIGHT)
+end
 
 gmconst.menuBindToString = {
 	[GM_MENUBIND_OPEN] = "Open",
-	[GM_MENUBIND_UP] = "Up",
-	[GM_MENUBIND_DOWN] = "Down",
-	[GM_MENUBIND_LEFT] = "Left",
-	[GM_MENUBIND_RIGHT] = "Right",
+	[GM_MENUBIND_MOVE.UP] = "Up",
+	[GM_MENUBIND_MOVE.DOWN] = "Down",
+	[GM_MENUBIND_MOVE.LEFT] = "Left",
+	[GM_MENUBIND_MOVE.RIGHT] = "Right",
 	[GM_MENUBIND_SELECT] = "Select",
 	[GM_MENUBIND_BACK] = "Back",
-}
-
--- converts button inputs (where possible) into menu controls directly.
-gmconst.playerButtonToControl = {
-	[BT_WEAPONNEXT] = GM_CONTROL_WEAPONNEXT,
-	[BT_WEAPONPREV] = GM_CONTROL_WEAPONPREV,
-
-	[BT_ATTACK]     = GM_CONTROL_FIREPRIMARY,
-	[BT_SPIN]       = GM_CONTROL_SPIN,
-	[BT_TOSSFLAG]   = GM_CONTROL_TOSSFLAG,
-	[BT_JUMP]       = GM_CONTROL_JUMP,
-	[BT_FIRENORMAL] = GM_CONTROL_FIRESECONDARY,
-
-	[BT_CUSTOM1]    = GM_CONTROL_CUSTOM1,
-	[BT_CUSTOM2]    = GM_CONTROL_CUSTOM2,
-	[BT_CUSTOM3]    = GM_CONTROL_CUSTOM3,
 }
 
 return gmconst

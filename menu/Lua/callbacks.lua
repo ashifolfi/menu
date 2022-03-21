@@ -19,6 +19,10 @@ function gmcallbacks.menuInit(player)
 	local menu = goldmenu.menus[goldmenu.curMenu]
 	local menudata = goldmenu.menudata[goldmenu.curMenu]
 
+	-- Refresh player controls
+	gmconst.refreshSysCtrl()
+	gmcontrols.plr = player
+
 	menu.style.init(menudata, menu)
 	menu.open = true
 end
@@ -48,8 +52,8 @@ local function singleMenuThink(i, goldmenu, player)
 	end
 
 	if goldmenu.open and activeMenu then
-		local upTics = goldmenu.bindPressed[GM_MENUBIND_UP]
-		local downTics = goldmenu.bindPressed[GM_MENUBIND_DOWN]
+		local upTics = goldmenu.bindPressed[GM_MENUBIND_MOVE.UP]
+		local downTics = goldmenu.bindPressed[GM_MENUBIND_MOVE.DOWN]
 
 		local selectTics = goldmenu.bindPressed[GM_MENUBIND_SELECT]
 		local backTics = goldmenu.bindPressed[GM_MENUBIND_BACK]
@@ -117,33 +121,18 @@ function gmcallbacks.doMenu(player)
 	end
 end
 
+
 function gmcallbacks.onControlsGet(player)
 	local goldmenu = player.goldmenu
 
-	gmcontrols.getMenuControls(player)
-
-	local cmd = player.cmd
+	-- Check the controls (KeyDown doesn't run every frame of course)
+	gmcontrols.checkControls()
 
 	if goldmenu.heldControlLock then
 		if not goldmenu.pressed[goldmenu.heldControlLock] then
 			goldmenu.heldControlLock = 0
 		end
 	end
-
-	if goldmenu.open or goldmenu.heldControlLock then
-		cmd.buttons = 0
-		cmd.forwardmove = 0
-		cmd.sidemove = 0
-
-		cmd.angleturn = goldmenu.prevangleturn
-		cmd.aiming = goldmenu.prevaiming
-
-		player.mo.angle = goldmenu.prevangleturn << 16
-		player.aiming = goldmenu.prevaiming << 16
-	end
-
-	goldmenu.prevangleturn = cmd.angleturn
-	goldmenu.prevaiming = cmd.aiming
 end
 
 -- draw stuff
@@ -192,7 +181,7 @@ function gmcallbacks.drawMenu(v, player)
 					continue
 				end
 
-				v.drawString(0, (i - 1) * 4, gmconst.controlToString[i] or "???", strFlags, "small")
+				--v.drawString(0, (i - 1) * 4, gmconst.controlToString[i] or "???", strFlags, "small")
 				v.drawString(80, (i - 1) * 4, iv, strFlags, "small-right")
 			end*/
 
