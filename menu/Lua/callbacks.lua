@@ -19,8 +19,11 @@ function gmcallbacks.menuInit(player)
 	local menu = goldmenu.menus[goldmenu.curMenu]
 	local menudata = goldmenu.menudata[goldmenu.curMenu]
 
-	-- Refresh player controls
+	-- Load config file for bindings
+	gmconf.loadConfig(goldmenu)
+	-- Refresh system controls
 	gmconst.refreshSysCtrl()
+	-- Pass player over to gmcontrols for
 	gmcontrols.plr = player
 
 	menu.style.init(menudata, menu)
